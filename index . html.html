@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>أسرار كوكب الأرض – المتحف الجيولوجي الافتراضي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1c1814;--ink:#f5e7cf;--oc:#e0a84a;--gr:#3f9b84;--rd:#c4573a;--pn:#2b241c}
+*{box-sizing:border-box;margin:0;font-family:Cairo,Tahoma,sans-serif}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);touch-action:none}
+canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block}
+.ov{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:14px;z-index:20}
+#start{background:radial-gradient(ellipse at 50% 30%,#4a3622,#16120e 70%);flex-direction:column;text-align:center;gap:14px}
+#start h1{font-size:clamp(34px,7vw,68px);font-weight:900;color:var(--oc);letter-spacing:1px}
+#start p{max-width:520px;line-height:1.9;opacity:.9}
+input{padding:12px 16px;font-size:18px;border-radius:10px;border:2px solid var(--oc);background:#120f0b;color:var(--ink);width:min(320px,90vw);text-align:center}
+.av{display:flex;gap:10px;justify-content:center}
+.av b{font-size:34px;width:60px;height:60px;display:flex;align-items:center;justify-content:center;border-radius:14px;background:var(--pn);border:3px solid transparent;cursor:pointer}
+.av b.on{border-color:var(--oc);background:#4a3820}
+button{cursor:pointer;border:0;border-radius:10px;padding:11px 22px;font-size:17px;font-weight:700;background:var(--oc);color:#20160a}
+button.s{background:var(--pn);color:var(--ink);border:1px solid #5a4930}
+#hud{position:fixed;top:0;left:0;right:0;z-index:10;display:none;padding:8px 10px;gap:10px;align-items:center;background:linear-gradient(#000a,#0000);pointer-events:none}
+#hud>*{pointer-events:auto}
+.pill{background:#1c1814cc;border:1px solid #5a4930;border-radius:20px;padding:5px 12px;font-size:14px;white-space:nowrap}
+#pb{flex:1;height:12px;background:#0007;border-radius:8px;overflow:hidden;border:1px solid #5a4930;min-width:60px}
+#pf{height:100%;width:0;background:linear-gradient(90deg,var(--gr),var(--oc));transition:width .5s}
+#map{position:fixed;bottom:10px;left:10px;z-index:10;width:120px;height:120px;border:2px solid #5a4930;border-radius:10px;background:#000a;display:none}
+#hint{position:fixed;bottom:22%;left:50%;transform:translateX(-50%);z-index:10;background:#000b;padding:8px 18px;border-radius:20px;display:none;border:1px solid var(--oc)}
+#toast{position:fixed;top:64px;left:50%;transform:translate(-50%,-30px);opacity:0;z-index:30;background:var(--gr);color:#fff;padding:10px 20px;border-radius:12px;font-weight:700;transition:.4s;text-align:center;max-width:90vw}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+#modal,#exam{background:#000a;display:none}
+.box{background:var(--pn);border:2px solid var(--oc);border-radius:18px;padding:20px 22px;max-width:620px;width:100%;max-height:88vh;overflow:auto;line-height:1.9}
+.box h2{color:var(--oc);margin-bottom:6px}
+.opt{display:block;width:100%;margin:7px 0;text-align:right;background:#3a3025;color:var(--ink);border:1px solid #6a5636}
+.opt.ok{background:#2c6e5b}.opt.no{background:#8a3a2a}
+#fb{margin-top:8px;padding:8px 12px;border-radius:10px;background:#0005}
+select{padding:6px;font-size:15px;background:#120f0b;color:var(--ink);border-radius:8px}
+#tc{position:fixed;bottom:10px;right:10px;z-index:10;display:none;gap:8px;align-items:flex-end}
+#tc .g{display:grid;grid-template-columns:repeat(3,54px);gap:6px}
+#tc button{width:54px;height:54px;padding:0;font-size:22px;background:#e0a84acc;touch-action:none}
+.cert{border:6px double var(--oc);padding:18px;text-align:center;background:#241c12;margin:10px 0}
+.cert h2{font-size:28px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+@media(max-width:700px){#tc{display:flex}#map{width:90px;height:90px;bottom:80px}}
+@media print{body>*:not(#exam){display:none!important}#exam{position:static;background:#fff;color:#000}.box{border:0;max-width:none}.row,.opt{display:none}}
+#xp{display:none}#hud{flex-wrap:wrap}
+#modal{background:none;pointer-events:none;justify-content:flex-start;align-items:center;padding:70px 12px 12px}
+#modal .box{pointer-events:auto;width:min(360px,100%);max-height:80vh;background:#2b241cee;font-size:15px;line-height:1.7}
+#gd{position:fixed;z-index:12;bottom:12px;left:50%;transform:translateX(-50%);width:min(520px,calc(100vw - 280px));background:#2b241cee;border:2px solid var(--oc);border-radius:16px;padding:10px 14px;font-size:15px;line-height:1.7;display:none}
+.row button{padding:7px 12px;font-size:14px}.fbk{margin-top:8px;padding:8px;background:#0005;border-radius:8px;font-size:14px}
+td{border:1px solid #5a4930;padding:3px 6px}#hint{bottom:auto;top:100px}
+@media(max-width:700px){#gd{width:94vw;bottom:140px}#modal{align-items:flex-end;padding:8px}#modal .box{max-height:52vh;width:100%}body.mo #gd{display:none!important}}
+:root{--oc:#ffb938;--gr:#2ec4a6}
+button{transition:.15s;box-shadow:0 3px 0 #0006}button:hover{transform:translateY(-2px) scale(1.03)}
+#start{background:radial-gradient(circle at 25% 20%,#2a6fdb66,transparent 50%),radial-gradient(circle at 80% 75%,#ff5fa055,transparent 50%),#070b1a}
+#start h1{background:linear-gradient(90deg,#ffb938,#ff6f91,#7ae7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.box{border-radius:22px;border-color:#7ae7ff;box-shadow:0 0 40px #2a8fdb55}
+#vid{position:fixed;inset:0;z-index:50;background:#000d;display:none;align-items:center;justify-content:center}
+.vw{width:min(96vw,165vh);background:#0a1024;border:2px solid #7ae7ff;border-radius:18px;overflow:hidden}
+.vw canvas{width:100%;height:auto;display:block}
+#vcap{padding:12px 16px;font-size:clamp(16px,2.6vw,26px);line-height:1.8;text-align:center;min-height:4.6em;background:#0008}
+.vb{display:flex;gap:8px;align-items:center;padding:8px}
+#vbar{flex:1;height:10px;background:#333;border-radius:6px;overflow:hidden}
+#vbf{display:block;height:100%;width:0;background:linear-gradient(90deg,#2ec4a6,#ffb938)}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="start" class="ov">
+<h1>أسرار كوكب الأرض</h1>
+<p>أنت الآن مستكشف جيولوجي في بعثة علمية. ادخل المتحف، تجوّل بين القاعات الثلاث، اجمع الأدلة والنقاط، ثم اجتز الاختبار النهائي لتنال شهادة الإتمام.</p>
+<input id="nm" maxlength="24" placeholder="اكتب اسمك">
+<div class="av" id="av"><b data-a="🧭">🧭</b><b data-a="⛏️">⛏️</b><b data-a="🔬">🔬</b><b data-a="🌋">🌋</b></div>
+<button id="go">ابدأ الرحلة</button>
+<small style="opacity:.7">الحركة: W A S D أو الأسهم • النظر: اسحب بالماوس • التفاعل: انقر على المجسم أو اضغط E • التقريب: عجلة الماوس</small>
+</div>
+
+<div id="hud">
+<div class="pill" id="who"></div><div class="pill" id="hall"></div><div class="pill" id="xp"></div>
+<div id="pb"><div id="pf"></div></div>
+<button class="s" id="lob">🏛 البهو</button><button class="s" id="bk">📖 الدليل</button><button class="s" id="gtg">🧑‍🏫 المرشد</button><button class="s" id="snd">🔊</button><select id="vs" title="اختر الصوت"></select><button class="s" id="vn">🗣 غيّر الصوت</button><button class="s" id="cardb">بطاقتي</button>
+</div>
+<canvas id="map" width="120" height="120"></canvas>
+<div id="hint">اضغط E أو انقر للتفاعل</div>
+<div id="toast"></div>
+<div id="tc">
+<button id="act" style="width:80px;font-size:15px">تفاعل</button>
+<div class="g"><span></span><button data-k="ArrowUp">▲</button><span></span><button data-k="ArrowLeft">◀</button><button data-k="ArrowDown">▼</button><button data-k="ArrowRight">▶</button></div>
+</div>
+<div id="gd"><b>🧑‍🏫 المرشد</b><p id="gt"></p><div class="row" id="gb"></div></div>
+<div id="modal" class="ov"><div class="box" id="mb"></div></div>
+<div id="exam" class="ov"><div class="box" id="eb"></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>window.THREE||document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"><\/script>')</script>
+<script>addEventListener("error",e=>{var d=document.getElementById("errb")||document.body.appendChild(Object.assign(document.createElement("div"),{id:"errb",style:"position:fixed;top:0;left:0;right:0;z-index:99;background:#a33;color:#fff;padding:6px;font:13px monospace;direction:ltr"}));d.textContent="Error: "+e.message+(window.THREE?"":" (Three.js لم يتم تحميله – تأكد من الاتصال بالإنترنت)")})</script>
+<script>
+const $=i=>document.getElementById(i);
+const KEY='geo-museum-2027';
+let S=null;try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch(e){}S=S||{name:'',av:'🧭',xp:0,seen:{},ans:{},badges:{},exam:null};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+
+/* ---------- البيانات التعليمية ---------- */
+// [القاعة, x, z, العنوان, النص, المجسم, سؤال[نص,خيارات,صحيح,تعليل]]
+const HALL=[0,{c:[0,-36],n:'القاعة الأولى: باطن الأرض والتراكيب'},{c:[36,0],n:'القاعة الثانية: المعادن والبلورات'},{c:[-36,0],n:'القاعة الثالثة: الصخور والدورة'}];
+const L1=[[-8,-6],[0,-6],[8,-6],[-8,6],[0,6],[8,6]],L2=[[-5,-8],[5,-8],[-5,8],[5,8],[0,0]],L3=[[-5,-6],[5,-6],[-5,6],[5,6]];
+const D=[
+[1,0,'أهمية علم الجيولوجيا','العلم الذي يدرس كل ما له علاقة بالأرض: مكوناتها وحركاتها وتاريخها وظواهرها وثرواتها، مثل التنقيب عن المعادن ومصادر الطاقة والمياه الجوفية ومواد البناء.','globe',['أي مما يلي من ثروات الأرض التي يبحث عنها الجيولوجي؟',['المياه الجوفية','الأقمار الصناعية','السحب'],0,'المياه الجوفية والمعادن والطاقة ومواد البناء من اهتمامات الجيولوجيا.']],
+[1,1,'طبقات الأرض','القشرة: قارية (سيال جرانيتية) ومحيطية (سيما بازلتية). الوشاح: علوي لدن مائع (الأسينوسفير) وسفلي صلب. اللب: خارجي مصهور من الحديد والنيكل وداخلي صلب عالي الكثافة. وتحيط بها الأغلفة: الجوي والمائي والحيوي.','earth',['أي طبقة مصهورة من الحديد والنيكل؟',['اللب الخارجي','اللب الداخلي','القشرة المحيطية'],0,'اللب الخارجي سائل، أما الداخلي فصلب لشدة الضغط.']],
+[1,2,'التراكيب الأولية','تتكون بعوامل بيئية ومناخية أثناء الترسيب: التطبق المتقاطع، علامات النيم (تموجات)، التدرج الطبقي (حبيبات خشنة أسفل ودقيقة أعلى)، والتشققات الطينية (جفاف الطين).','prim',['أي تركيب يدل على جفاف طين قديم؟',['علامات النيم','التشققات الطينية','التدرج الطبقي'],1,'تتشقق الرواسب الطينية عند جفافها.']],
+[1,3,'الطيات','تراكيب تكتونية تنشأ من قوى الباطن. الطية المحدبة تنحني طبقاتها لأعلى، والمقعرة لأسفل. عناصرها: المستوى المحوري، الجناحان، والمحور.','folds',['الطية التي تنحني طبقاتها لأعلى تسمى:',['محدبة','مقعرة','فالق'],0,'المحدبة قمتها لأعلى، والمقعرة على شكل حوض.']],
+[1,4,'الفوالق','كسور تحرك عندها الصخر. الأنواع: عادي، معكوس، دسر، ذو حركة أفقية، بارز (هورست)، وخندقي (جرابن). يصاحبها ظواهر مثل المرايا الانزلاقية والمنحدرات.','faults',['في الفالق المعكوس يتحرك الجدار العلوي:',['لأسفل','لأعلى','أفقيًا فقط'],1,'ضغط الانضغاط يرفع الجدار العلوي فوق السفلي.']],
+[1,5,'أسطح عدم التوافق','سطح تعرية أو انقطاع ترسيب. المتباين: رسوبية فوق نارية أو متحولة. الزاوي: طبقات أفقية فوق مائلة. الانقطاعي: طبقات متوازية تفصلها فجوة زمنية.','uncon',['طبقات أفقية فوق طبقات مائلة تعني عدم توافق:',['زاوي','متباين','انقطاعي'],0,'اختلاف الميل بين المجموعتين يدل على الزاوي.']],
+[2,0,'ما المعدن؟','مادة صلبة غير عضوية تتكون في الطبيعة ولها تركيب كيميائي محدد وشكل بلوري مميز. عنصرية كالذهب والكبريت، أو مركبة: سيليكات وكربونات وأكاسيد.','gold',['أي مما يلي معدن عنصري؟',['الذهب','الكوارتز','الجرانيت'],0,'الكوارتز سيليكات مركبة، والجرانيت صخر.']],
+[2,1,'الأنظمة البلورية','تعتمد على أطوال المحاور البلورية والزوايا بينها وهي 7: مكعب، رباعي، معيني قائم، سداسي، ثلاثي، أحادي الميل، ثلاثي الميل.','sys',['كم عدد الأنظمة البلورية الرئيسية؟',['4','7','12'],1,'سبعة أنظمة.']],
+[2,2,'الخواص البصرية','البريق (معدني/زجاجي)، اللون ثابت أو متغير، المخدش وهو لون مسحوق المعدن، والشفافية.','opt',['لون مسحوق المعدن يسمى:',['البريق','المخدش','الشفافية'],1,'المخدش أدق من اللون الظاهري.']],
+[2,3,'الخواص التماسكية','الصلادة: مقاومة الخدش بمقياس موهس. الانفصام: انكسار في مستويات منتظمة. المكسر: انكسار غير منتظم.','coh',['مقياس موهس يقيس:',['الصلادة','الكثافة','اللون'],0,'من 1 (التلك) إلى 10 (الألماس).']],
+[2,4,'معمل موهس','اختر معدنين وجرّب: المعدن الأصلد يخدش الأقل صلادة. استخدم ذلك للتنبؤ بنوع المعدن المجهول.','mohs',null],
+[3,0,'دورة الصخور','العلاقة بين الأنواع الثلاثة: التجوية والنقل والترسيب تصنع الرسوبية، الحرارة والضغط تحولها لمتحولة، الانصهار ثم التبريد والتبلور ينتج نارية.','cycle',['أي عملية تحول الصهير إلى صخر ناري؟',['التبريد والتبلور','التجوية','الترسيب'],0,'تبلور الصهير عند برودته.']],
+[3,1,'الصخور النارية','متسلسلة بوين تحدد ترتيب تبلور المعادن. جوفية: تبرد ببطء (جرانيت)، متداخلة قرب السطح (دوليرايت وقد تعطي نسيجًا بورفيريًا)، بركانية سطحية تبرد بسرعة (بازلت). وتصنف بنسبة السيليكا.','ign',['الصخور البركانية تبرد:',['ببطء في الأعماق','بسرعة على السطح','بالضغط'],1,'التبريد السريع يعطي بلورات دقيقة.']],
+[3,2,'الصخور الرسوبية','تتكون من ترسيب نواتج التجوية: فتاتية (الحجر الرملي)، كيميائية النشأة (الجبس)، وعضوية وبيوكيميائية (الحجر الجيري العضوي).','sed',['الحجر الرملي من الصخور:',['فتاتية','كيميائية','نارية'],0,'يتكون من حبيبات رمل متماسكة.']],
+[3,3,'الصخور المتحولة','تتكون بالحرارة الشديدة والضغط. كتلية بالحرارة (رخام، كوارتزيت) ومتورقة بالحرارة والضغط معًا (شيست، نيس).','meta',['الصخور المتورقة تتكون بـ:',['الحرارة فقط','الحرارة والضغط معًا','التبريد'],1,'الضغط يرتب المعادن في أشرطة متورقة.']]
+];
+const X=[
+['أي نطاقات الأرض صخور لدنة مائعة تسمح بتيارات الحمل؟',['القشرة القارية','الجزء العلوي من الوشاح (الأستينوسفير)','اللب الداخلي','القشرة المحيطية'],1,'الأسينوسفير لدن مائع يسمح بتيارات الحمل.'],
+['طبقات رسوبية أفقية تعلو مباشرة صخورًا نارية: نوع عدم التوافق؟',['زاوي','انقطاعي','متباين','فالق معكوس'],2,'رسوبية فوق نارية = عدم توافق متباين.'],
+['لماذا الفحم أو البترول لا يعدان معادن؟',['لأنهما يتكونان في الطبيعة','لأنهما من أصل عضوي وليس لهما تركيب كيميائي محدد أو شكل بلوري مميز','لأنهما مواد صلبة','لعدم وجودهما بكميات اقتصادية'],1,'المعدن غير عضوي وله تركيب وشكل بلوري محددان.'],
+['عينة تخدش الأرثوكليز (6) ولا تخدش التوباز (8): المعدن المتوقع؟',['الكالسيت','الفلوريت','الكوارتز (7)','الجبس'],2,'صلادتها بين 6 و8 فهي 7: الكوارتز.'],
+['أي الصخور النارية يتبلور على مرحلتين وينتج نسيجًا بورفيريًا؟',['الجرانيت','البازلت','الأوبسيديان','الدوليرايت (صخر متداخل)'],3,'التبلور على مرحلتين يميز الصخور المتداخلة كالدوليرايت.'],
+['الحجر الجيري عند تعرضه لحرارة شديدة من صهير يتحول إلى؟',['الشيست الميكائي','الرخام (صخر متحول كتلي)','الكوارتزيت','النيس'],1,'التحول الحراري يحول الحجر الجيري إلى رخام.']
+];
+const LAB='أب جد'.replace(' ','');const AB=['أ','ب','ج','د'];
+
+/* ---------- المشهد ---------- */
+const cv=$('c'),R=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+R.setPixelRatio(Math.min(devicePixelRatio,2));R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.3;
+const sc=new THREE.Scene();sc.background=new THREE.Color('#02040a');sc.fog=new THREE.Fog('#050a14',16,58);
+const cam=new THREE.PerspectiveCamera(70,1,.1,3000);cam.rotation.order='YXZ';
+function rs(){R.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix()}
+addEventListener('resize',rs);rs();
+sc.add(new THREE.HemisphereLight('#b8d8ff','#0c1420',.8));
+const H=5;
+{const pm=new THREE.PMREMGenerator(R),es=new THREE.Scene();es.background=new THREE.Color('#05080f');[[0,10,0,'#ffffff',8],[8,3,0,'#6fd0ff',4],[-8,3,4,'#ffb070',3],[0,3,-8,'#a0a0ff',3]].forEach(([x,y,z,c,i])=>{const m=new THREE.Mesh(new THREE.BoxGeometry(6,.4,6),new THREE.MeshBasicMaterial({color:new THREE.Color(c).multiplyScalar(i)}));m.position.set(x,y,z);es.add(m)});sc.environment=pm.fromScene(es).texture;
+ const p=[];for(let i=0;i<2500;i++){const a=Math.random()*6.283,b=Math.acos(2*Math.random()-1),r=900;p.push(r*Math.sin(b)*Math.cos(a),Math.abs(r*Math.cos(b))*.9+20,r*Math.sin(b)*Math.sin(a))}
+ const sg=new THREE.BufferGeometry();sg.setAttribute('position',new THREE.Float32BufferAttribute(p,3));sc.add(new THREE.Points(sg,new THREE.PointsMaterial({color:'#dfeaff',size:2.2,sizeAttenuation:false,fog:false})));
+ const pl=(r,c,x,y,z,e)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,32,24),new THREE.MeshStandardMaterial({color:c,roughness:.9,emissive:e,emissiveIntensity:.5,fog:false}));m.position.set(x,y,z);sc.add(m)};
+ pl(140,'#c9774a',-500,260,-600,'#5a2410');pl(60,'#5aa0d0',600,180,300,'#10304a');pl(30,'#e8d9b0',100,400,700,'#443a20')}const NT=(()=>{const k=document.createElement('canvas');k.width=k.height=128;const x=k.getContext('2d');x.fillStyle='#ddd';x.fillRect(0,0,128,128);for(let i=0;i<2500;i++){const v=185+Math.random()*70|0;x.fillStyle='rgb('+v+','+v+','+v+')';x.fillRect(Math.random()*128,Math.random()*128,1+Math.random()*3,1+Math.random()*3)}const t=new THREE.CanvasTexture(k);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(2,2);return t})();
+const mat=(c,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:.5,map:NT,bumpMap:NT,bumpScale:2.5,envMapIntensity:1.3},o||{}));
+const mesh=(g,c,o)=>new THREE.Mesh(g,mat(c,o));
+function tile(c1,c2){const k=document.createElement('canvas');k.width=k.height=128;const x=k.getContext('2d');x.fillStyle=c1;x.fillRect(0,0,128,128);for(let i=0;i<900;i++){x.fillStyle=Math.random()<.5?'rgba(0,0,0,.08)':'rgba(255,255,255,.07)';x.fillRect(Math.random()*128,Math.random()*128,2,2)}x.strokeStyle=c2;x.lineWidth=2;x.strokeRect(0,0,128,128);const t=new THREE.CanvasTexture(k);t.wrapS=t.wrapT=THREE.RepeatWrapping;return t}
+function wall(x,z,len,vert,gap,c){
+ const segs=!gap?[[0,len]]:gap>=len?[]:[[-(len+gap)/4,(len-gap)/2],[(len+gap)/4,(len-gap)/2]];
+ segs.forEach(([o,l])=>{const m=mesh(new THREE.BoxGeometry(vert?.5:l,H,vert?l:.5),c);m.position.set(vert?x:x+o,H/2,vert?z+o:z);sc.add(m);const bb=mesh(new THREE.BoxGeometry(vert?.6:l,.25,vert?l:.6),'#0e2a3a',{emissive:'#1aa8d8',emissiveIntensity:.9});bb.position.set(m.position.x,.125,m.position.z);sc.add(bb)})}
+function room(cx,cz,w,d,g,fc,wc){
+ const t=tile(fc,'#00000055');t.repeat.set(w/2,d/2);
+ const f=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshStandardMaterial({map:t,roughness:.18,metalness:.65}));f.rotation.x=-Math.PI/2;f.position.set(cx,0,cz);sc.add(f);
+ const ce=new THREE.Mesh(new THREE.PlaneGeometry(w,d),new THREE.MeshStandardMaterial({color:'#0b1d30',transparent:true,opacity:.35,roughness:.05,metalness:.9}));ce.rotation.x=Math.PI/2;ce.position.set(cx,H,cz);sc.add(ce);for(let k=-1;k<=1;k++){const lp=new THREE.Mesh(new THREE.PlaneGeometry(w>6?w*.6:1.2,.5),new THREE.MeshBasicMaterial({color:'#9fe8ff'}));lp.rotation.x=Math.PI/2;lp.position.set(cx,H-.01,cz+k*d*.3);sc.add(lp)}
+ wall(cx,cz-d/2,w,0,g.n,wc);wall(cx,cz+d/2,w,0,g.s,wc);wall(cx+w/2,cz,d,1,g.e,wc);wall(cx-w/2,cz,d,1,g.w,wc);
+ const p=new THREE.PointLight('#8fd8ff',1.4,Math.max(w,d)*1.4);p.position.set(cx,H-.8,cz);sc.add(p)}
+room(0,0,24,24,{n:4,e:4,w:4},'#1a2536','#26364d');
+room(0,-17,4,10,{n:4,s:4},'#141d2b','#22314a');room(0,-36,28,28,{s:4},'#2a2130','#3a2f4a');
+room(17,0,10,4,{e:4,w:4},'#141d2b','#22314a');room(36,0,28,28,{w:4},'#10302f','#1d4a4a');
+room(-17,0,10,4,{e:4,w:4},'#141d2b','#22314a');room(-36,0,28,28,{e:4},'#33201c','#4a2f2a');
+function sign(t,w,h,col){const k=document.createElement('canvas');k.width=512;k.height=Math.round(512*h/w);const x=k.getContext('2d');
+ x.fillStyle=col||'#2b2218';x.fillRect(0,0,k.width,k.height);x.strokeStyle='#e0a84a';x.lineWidth=6;x.strokeRect(6,6,k.width-12,k.height-12);
+ x.fillStyle='#f5e7cf';x.font='bold 38px Cairo,Tahoma,sans-serif';x.textAlign='center';x.textBaseline='middle';x.direction='rtl';x.fillText(t,k.width/2,k.height/2);
+ return new THREE.Mesh(new THREE.PlaneGeometry(w,h),new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(k)}))}
+function put(o,x,y,z,ry){o.position.set(x,y,z);o.rotation.y=ry||0;sc.add(o);return o}
+put(sign('القاعة الأولى: باطن الأرض',4,1,'#5d3d22'),0,4,-12.2,0);
+put(sign('القاعة الثانية: المعادن',4,1,'#1e5a4e'),12.2,4,0,-Math.PI/2);
+put(sign('القاعة الثالثة: الصخور',4,1,'#6a2f25'),-12.2,4,0,Math.PI/2);
+put(sign('البهو الرئيسي – أسرار كوكب الأرض',9,1.2),0,4,11.7,Math.PI);
+/* بوابات مغلقة */
+const gates={2:mesh(new THREE.BoxGeometry(.3,4.6,4),'#c4573a',{transparent:true,opacity:.55,emissive:'#601810'}),3:mesh(new THREE.BoxGeometry(.3,4.6,4),'#c4573a',{transparent:true,opacity:.55,emissive:'#601810'})};
+gates[2].position.set(17,2.3,0);gates[3].position.set(-17,2.3,0);sc.add(gates[2],gates[3]);
+/* منطقة المشي */
+const RC=[[-12,12,-12,12,()=>1],[-2,2,-23,-11,()=>1],[-14,14,-50,-22,()=>1],[11,23,-2,2,()=>S.badges[1]],[22,50,-14,14,()=>S.badges[1]],[-23,-11,-2,2,()=>S.badges[2]],[-50,-22,-14,14,()=>S.badges[2]]];
+const walk=(x,z)=>RC.some(r=>r[4]()&&x>r[0]+.5&&x<r[1]-.5&&z>r[2]+.5&&z<r[3]-.5);
+
+/* ---------- المجسمات ---------- */
+const G=THREE,grp=()=>new G.Group();
+function slabs(cols,w,h,d){const g=grp();cols.forEach((c,i)=>{const m=mesh(new G.BoxGeometry(w,h,d),c);m.position.y=i*h+h/2;g.add(m)});return g}
+function wave(i,cols){const s=new G.Shape(),n=24,y=k=>Math.sin((-1.5+3*k/n)*2.2)*.38+i*.32;
+ s.moveTo(-1.5,y(0));for(let k=1;k<=n;k++)s.lineTo(-1.5+3*k/n,y(k));for(let k=n;k>=0;k--)s.lineTo(-1.5+3*k/n,y(k)-.28);
+ const g=new G.ExtrudeGeometry(s,{depth:1.4,bevelEnabled:false});g.translate(0,0,-.7);return mesh(g,cols[i])}
+function polish(g,k){g.traverse(o=>{if(o.isMesh&&o.material&&o.material.isMeshStandardMaterial){o.material.envMapIntensity=1.5;if(['sys','gold','opt','coh','mohs'].includes(k)){o.material.roughness=.12;o.material.metalness=k=='gold'?1:.25}}})}
+const MODELS={
+globe:()=>{const g=grp(),k=document.createElement('canvas');k.width=1024;k.height=512;const x=k.getContext('2d');x.fillStyle='#0b3a6e';x.fillRect(0,0,1024,512);
+ for(let i=0;i<70;i++){const cx=Math.random()*1024,cy=90+Math.random()*330,r=15+Math.random()*60;for(let j=0;j<9;j++){x.fillStyle=['#2f6b34','#4f7f3a','#8a7a4a','#c8b27a'][j%4];x.beginPath();x.ellipse(cx+(Math.random()-.5)*r,cy+(Math.random()-.5)*r*.6,r*(1-j*.07),r*.6*(1-j*.07),Math.random()*3,0,6.3);x.fill()}}
+ x.fillStyle='#f4f8ff';x.fillRect(0,0,1024,26);x.fillRect(0,486,1024,26);x.globalAlpha=.35;for(let i=0;i<60;i++){x.fillStyle='#fff';x.beginPath();x.ellipse(Math.random()*1024,Math.random()*512,20+Math.random()*60,5+Math.random()*10,0,0,6.3);x.fill()}
+ const t=new G.CanvasTexture(k);g.add(new G.Mesh(new G.SphereGeometry(.9,64,48),new G.MeshStandardMaterial({map:t,bumpMap:t,bumpScale:.6,roughness:.7,metalness:.05})));
+ g.add(new G.Mesh(new G.SphereGeometry(.96,48,32),new G.MeshBasicMaterial({color:'#6fb8ff',transparent:true,opacity:.14,side:1})));g.position.y=1;return g},
+earth:()=>{const g=grp(),L=[];[[.26,'#f2d36a',5],[.5,'#e0832a',4],[.74,'#a8472f',3],[.93,'#c8683a',2],[1,'#2f6f9a',1]].forEach(([r,c,k])=>{const m=mesh(new G.SphereGeometry(r,28,18,0,Math.PI*1.5),c,{side:2,roughness:.45,emissive:c,emissiveIntensity:.3});m.userData.layer=k;L[k]=m;g.add(m)});const cs=mesh(new G.SphereGeometry(1.04,20,12,.3,1.1,.9,1.1),'#6a9a4a',{side:2});cs.userData.layer=0;L[0]=cs;g.add(cs);g.userData.layers=L;g.position.y=1.1;return g},
+prim:()=>{const g=slabs(['#c9a15b','#8e6b3a','#d8b97a','#a47c48'],1.7,.28,1.3);const b=mesh(new G.BoxGeometry(1.4,.05,1),'#f0dfae');b.position.y=.55;b.rotation.z=.25;g.add(b);return g},
+folds:()=>{const g=grp(),c=['#b5651d','#d9a441','#7a9e5b'];for(let i=0;i<3;i++)g.add(wave(i,c));g.position.y=.3;return g},
+faults:()=>{const g=grp(),c=['#a0522d','#d9a441','#7a9e5b'],a=slabs(c,1,.3,1.4),b=slabs(c,1,.3,1.4);a.position.x=-.52;b.position.set(.52,.4,0);b.rotation.z=-.12;g.add(a,b);g.userData.blk=b;return g},
+uncon:()=>{const g=grp(),t=slabs(['#a0522d','#cd853f','#8b4513','#d2691e'],2,.25,1.3);t.rotation.z=.5;t.position.set(-.3,-.2,0);g.add(t);[['#3f9b84',.95],['#7ec8a8',1.2]].forEach(([c,y])=>{const m=mesh(new G.BoxGeometry(2.2,.25,1.4),c);m.position.y=y;g.add(m)});return g},
+gold:()=>{const m=mesh(new G.IcosahedronGeometry(.55,1),'#e0b020',{metalness:.9,roughness:.25,flatShading:false,emissive:'#3a2800'});m.position.y=.9;return m},
+sys:()=>{const g=grp(),sh=[new G.BoxGeometry(.7,.7,.7),new G.BoxGeometry(.55,.9,.55),new G.BoxGeometry(.5,.7,.85),new G.CylinderGeometry(.35,.35,.8,6),new G.CylinderGeometry(.35,.35,.8,3),new G.BoxGeometry(.7,.7,.55),new G.OctahedronGeometry(.5)];
+ sh.forEach((s,i)=>{const m=mesh(s,new G.Color().setHSL(i/7,.55,.55),{metalness:.3,roughness:.3});const a=i/7*Math.PI*2;m.position.set(Math.cos(a)*1.1,.9,Math.sin(a)*1.1);if(i==5)m.rotation.x=.5;g.add(m)});return g},
+opt:()=>{const g=grp();g.add(mesh(new G.CylinderGeometry(.5,.5,1.2,6),'#9fe0ff',{transparent:true,opacity:.65,metalness:.3,roughness:.05}));const t=mesh(new G.ConeGeometry(.5,.5,6),'#9fe0ff',{transparent:true,opacity:.65,roughness:.05});t.position.y=.85;g.add(t);g.position.y=1.1;return g},
+coh:()=>{const m=mesh(new G.DodecahedronGeometry(.7),'#b8a0d8',{flatShading:false,roughness:.2});m.position.y=1;return m},
+mohs:()=>{const g=grp();for(let i=0;i<10;i++){const m=mesh(new G.BoxGeometry(.2,.3+i*.07,.3),new G.Color().setHSL(.1,.15,.25+i*.07));m.position.set(-1+i*.22,.2+i*.035,0);g.add(m)}return g},
+cycle:()=>{const g=grp();[['#b5452e',0],['#d9b26f',2.09],['#6d8a7a',4.19]].forEach(([c,a])=>{const m=mesh(new G.BoxGeometry(.5,.5,.5),c);m.position.set(Math.cos(a)*1.1,.9,Math.sin(a)*1.1);g.add(m)});const t=mesh(new G.TorusGeometry(1.1,.04,8,40),'#e0a84a',{emissive:'#6a4a10'});t.rotation.x=Math.PI/2;t.position.y=.9;g.add(t);const ar=grp();ar.position.y=.9;[1,3.1,5.2].forEach(a=>{const c=mesh(new G.ConeGeometry(.1,.3,8),'#ffd34a',{emissive:'#aa7700'});c.position.set(Math.cos(a)*1.1,0,Math.sin(a)*1.1);c.rotation.set(0,-a-Math.PI/2,-Math.PI/2);ar.add(c)});g.add(ar);g.userData.ar=ar;return g},
+ign:()=>{const g=grp(),m=mesh(new G.DodecahedronGeometry(.8),'#4a3b3b',{flatShading:false});m.position.y=1;g.add(m);[[.5,.4],[-.4,.5],[.2,-.6],[-.6,-.2]].forEach(([a,b])=>{const s=mesh(new G.SphereGeometry(.12,8,8),'#f4e8d0');s.position.set(a,1+b*.6,b>0?.65:-.5);g.add(s)});return g},
+sed:()=>slabs(['#d9b26f','#c98f4f','#e6cf9a','#b9783f','#d9b26f'],1.4,.3,1.2),
+meta:()=>{const g=slabs(['#7a8a7a','#cfd6cf','#5f6f66','#e0e4de','#7a8a7a','#cfd6cf'],1.3,.2,1.1);g.rotation.z=.18;g.position.y=.2;return g}};
+const EX=[],ped=mesh(new G.BoxGeometry(2.2,.9,2.2),'#d8d0c2',{roughness:.3,metalness:.1});
+D.forEach((d,i)=>{const hc=HALL[d[0]].c,pool=d[0]==1?L1:d[0]==2?L2:L3,o=pool[d[1]];
+ const g=grp(),p=ped.clone();p.material=ped.material;p.position.y=.45;g.add(p);
+ const sp=grp();sp.position.y=.9;const mdl=MODELS[d[4]]();polish(mdl,d[4]);sp.add(mdl);sp.scale.setScalar(1.1);g.add(sp);
+ if(d[0]>1){const gl2=mesh(new G.BoxGeometry(2.3,2.4,2.3),'#bfe8ff',{transparent:true,opacity:.1,roughness:0,depthWrite:false});gl2.position.y=2.1;g.add(gl2)}const mk=mesh(new G.OctahedronGeometry(.18),'#ffd34a',{emissive:'#ffb000'});mk.position.y=3.3;g.add(mk);
+ const lt=sign(d[2],2.2,.5);lt.position.set(0,2.8,0);g.add(lt);
+ const plg=new G.Mesh(new G.CircleGeometry(2.1,32),new G.MeshBasicMaterial({color:'#ffe9c0',transparent:true,opacity:.14,blending:G.AdditiveBlending,depthWrite:false}));plg.rotation.x=-Math.PI/2;plg.position.y=.02;plg.raycast=()=>{};g.add(plg);const cn=new G.Mesh(new G.CylinderGeometry(.5,1.8,H-.4,24,1,true),new G.MeshBasicMaterial({color:'#ffe2b0',transparent:true,opacity:.045,blending:G.AdditiveBlending,depthWrite:false,side:2}));cn.position.y=(H-.4)/2+.2;cn.raycast=()=>{};g.add(cn);g.position.set(hc[0]+o[0],0,hc[1]+o[1]);g.userData.i=i;sc.add(g);EX.push({g,sp,mk,lt,i,p:g.position})});
+const stand=grp(),gl=mesh(new G.IcosahedronGeometry(1.7,2),'#2f78b8',{flatShading:false,emissive:'#0a2a4a'});gl.position.y=3;stand.add(gl);
+const pd=mesh(new G.CylinderGeometry(1.5,1.8,1,24),'#3a332c');pd.position.y=.5;stand.add(pd);sc.add(stand);
+const portal=mesh(new G.TorusGeometry(1.5,.12,12,40),'#e0a84a',{emissive:'#c07a10'});portal.position.set(-8,2,8);sc.add(portal);
+put(sign('الاختبار النهائي',3,.7,'#2b2218'),-8,4,8,0);
+const pi=mesh(new G.CircleGeometry(1.35,32),'#7a3ad0',{transparent:true,opacity:.35,emissive:'#4020a0',side:2});pi.position.set(-8,2,8);sc.add(pi);
+
+/* ---------- الحالة والواجهة ---------- */
+let sound=true,ac;
+function beep(f,d){if(!sound)return;try{ac=ac||new AudioContext();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.1,ac.currentTime);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+let tt;function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),3200)}
+const level=()=>S.xp<60?'متدرب':S.xp<180?'مستكشف':'خبير جيولوجي';
+function hud(){$('who').textContent=S.av+' '+S.name;$('xp').textContent='⭐ '+S.xp+' XP';const n=Object.keys(S.seen).length;$('pf').style.width=(n/D.length*100)+'%';
+ gates[2].visible=!S.badges[1];gates[3].visible=!S.badges[2];EX.forEach(e=>e.mk.material.color.set(S.seen[e.i]?'#4bd08a':'#ffd34a'));save()}
+function addXP(n){S.xp+=n;hud()}
+function checkHalls(){for(let h=1;h<=3;h++){if(!S.badges[h]&&D.filter(d=>d[0]==h).every(d=>S.seen[D.indexOf(d)])){S.badges[h]=1;addXP(50);beep(660,.4);
+ toast('🏅 شارة إنجاز: '+HALL[h].n+(h<3?' – فُتحت القاعة التالية!':''));if(h==3)setTimeout(()=>toast('أتممت القاعات! اتجه إلى بوابة الاختبار النهائي'),3500)}}}
+function show(html){$('mb').innerHTML=html+'<div class="row"><button class="s" id="cl">إغلاق</button></div>';$('modal').style.display='flex';$('cl').onclick=()=>$('modal').style.display='none'}
+function qhtml(i){const q=D[i][5];if(!q)return'';const a=undefined;
+ return`<hr style="margin:10px 0;border-color:#5a4930"><b>❓ ${q[0]}</b>`+q[1].map((o,k)=>`<button class="opt ${a!==undefined?(k==q[2]?'ok':k==a?'no':''):''}" data-k="${k}">${o}</button>`).join('')+`<div id="fb">${a!==undefined?(a==q[2]?'✅ ':'❌ ')+q[3]:'اختر إجابة'}</div>`}
+function openEx(i){const d=D[i];if(!S.seen[i]){S.seen[i]=1;addXP(10);checkHalls()}
+ let extra='';if(d[5]=='mohs'||d[4]=='mohs'){const o=MO.map((m,k)=>`<option value="${k}">${m[0]}</option>`).join('');extra=`<p><select id="ma">${o}</select> تخدش <select id="mb2">${o}</select> <button id="mg">جرّب</button></p><p id="mr"></p>`}
+ show(`<h2>${d[2]}</h2><p>${d[3]}</p>${extra}${qhtml(i)}`);
+ if(extra){$('mg').onclick=()=>{const a=MO[$('ma').value],b=MO[$('mb2').value];$('mr').textContent=a[1]>b[1]?`✔ ${a[0]} (${a[1]}) يخدش ${b[0]} (${b[1]})`:a[1]<b[1]?`✘ ${a[0]} (${a[1]}) لا يخدش ${b[0]} (${b[1]}) بل العكس`:'متساويان في الصلادة، لا يخدش أحدهما الآخر بسهولة';beep(520,.15)}}
+ if(d[5])document.querySelectorAll('#mb .opt').forEach(b=>b.onclick=()=>{const k=+b.dataset.k,q=d[5],ok=k==q[2];S.ans[i]=k;
+  document.querySelectorAll('#mb .opt').forEach(x=>{x.classList.remove('ok','no');if(+x.dataset.k==q[2])x.classList.add('ok');else if(+x.dataset.k==k)x.classList.add('no');x.onclick=null});
+  $('fb').textContent=(ok?'✅ أحسنت! +20 XP – ':'❌ ليست الإجابة الصحيحة – ')+q[3];if(ok)addXP(20);beep(ok?880:200,.3);save()})}
+const MO=[['التلك',1],['الجبس',2],['الكالسيت',3],['الفلوريت',4],['الأباتيت',5],['الأرثوكليز',6],['الكوارتز',7],['التوباز',8],['الكوراندوم',9],['الألماس',10]];
+function card(){const b=[1,2,3].map(h=>`${S.badges[h]?'🏅':'⬜'} ${HALL[h].n}`).join('<br>');
+ show(`<h2>${S.av} ${S.name}</h2><p>المستوى: <b>${level()}</b><br>النقاط: ${S.xp} XP<br>التقدم: ${Object.keys(S.seen).length}/${D.length} معروضًا<br>${b}<br>${S.exam!==null?'نتيجة الاختبار: '+S.exam+'/6':'الاختبار النهائي: لم يُجرَ بعد'}</p><button class="s" id="rst">بدء رحلة جديدة</button>`);
+ $('rst').onclick=()=>{if(confirm('سيتم مسح تقدمك. متأكد؟')){try{localStorage.removeItem(KEY)}catch(e){}location.reload()}}}
+/* الاختبار النهائي */
+function exam(){let q=0,sc2=0,ans=[];const E=$('eb');$('exam').style.display='flex';
+ function render(){const x=X[q];E.innerHTML=`<h2>الاختبار النهائي (${q+1}/6)</h2><b>${x[0]}</b>`+x[1].map((o,k)=>`<button class="opt" data-k="${k}">${AB[k]}- ${o}</button>`).join('')+'<div id="fb"></div><div class="row"><button id="nx" disabled style="opacity:.5">'+(q<5?'السؤال التالي ◀':'عرض النتيجة')+'</button></div>';
+  E.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const k=+b.dataset.k,ok=k==x[2];ans.push(k);if(ok)sc2++;
+   E.querySelectorAll('.opt').forEach(o=>{o.onclick=null;if(+o.dataset.k==x[2])o.classList.add('ok');else if(+o.dataset.k==k)o.classList.add('no')});
+   const msg=ok?'ممتاز! إجابة صحيحة. '+x[3]:'الإجابة الصحيحة هي: '+AB[x[2]]+'- '+x[1][x[2]]+'. '+x[3];$('fb').textContent=(ok?'✅ ':'❌ ')+msg;$('nx').disabled=false;$('nx').style.opacity=1;speak(msg);beep(ok?880:200,.3);
+   $('nx').onclick=()=>{q++;q<6?render():done()}})}
+ function done(){S.exam=sc2;addXP(sc2*10);save();const rev=X.map((x,i)=>`<p>${ans[i]==x[2]?'✅':'❌'} س${i+1}: الصحيحة ${AB[x[2]]}- ${x[1][x[2]]}</p>`).join('');
+  E.innerHTML=`<h2>النتيجة: ${sc2} / 6</h2>${rev}<div class="cert"><h2>🏆 شهادة إتمام</h2><p>تشهد بعثة «أسرار كوكب الأرض» أن المستكشف</p><h2>${S.name}</h2><p>أتم رحلة المتحف الجيولوجي بدرجة <b>${sc2} من 6</b> (${Math.round(sc2/6*100)}%)<br>المستوى: ${level()} – ${new Date().toLocaleDateString('ar-EG')}</p></div><div class="row"><button onclick="print()">طباعة الشهادة</button><button class="s" id="ce">العودة للمتحف</button></div>`;
+  $('ce').onclick=()=>$('exam').style.display='none'}
+ render()}
+
+/* ---------- التحكم ---------- */
+const keys={};let yaw=0,pit=0;cam.position.set(0,1.7,7);
+addEventListener('keydown',e=>{keys[e.key.length>1?e.key:e.key.toLowerCase()]=1;if(e.key=='e'||e.key=='E')near&&openEx(near.i)});
+addEventListener('keyup',e=>delete keys[e.key.length>1?e.key:e.key.toLowerCase()]);
+document.querySelectorAll('#tc [data-k]').forEach(b=>{const k=b.dataset.k;['pointerdown'].forEach(ev=>b.addEventListener(ev,e=>{e.preventDefault();keys[k]=1}));['pointerup','pointerleave','pointercancel'].forEach(ev=>b.addEventListener(ev,()=>delete keys[k]))});
+$('act').onclick=()=>near&&openEx(near.i);
+let dn=null,mv=0;
+cv.addEventListener('pointerdown',e=>{dn=[e.clientX,e.clientY];mv=0});
+addEventListener('pointermove',e=>{if(!dn)return;const dx=e.clientX-dn[0],dy=e.clientY-dn[1];mv+=Math.abs(dx)+Math.abs(dy);if(FC){FC.e.sp.rotation.y+=dx*.01;FC.e.sp.rotation.x=Math.max(-.9,Math.min(.9,FC.e.sp.rotation.x+dy*.008))}else if(!busy){yaw-=dx*.005;pit=Math.max(-1,Math.min(1,pit-dy*.004))}dn=[e.clientX,e.clientY]});
+addEventListener('pointerup',e=>{if(dn&&mv<8&&e.target===cv)pick(e);dn=null});
+cv.addEventListener('wheel',e=>{if(FC){zoomEx(e.deltaY<0?1.1:.9);return}cam.fov=Math.max(35,Math.min(80,cam.fov+e.deltaY*.03));cam.updateProjectionMatrix()});
+const ray=new THREE.Raycaster();
+function pick(e){ray.setFromCamera({x:e.clientX/innerWidth*2-1,y:-(e.clientY/innerHeight*2-1)},cam);
+ const hit=ray.intersectObjects([...EX.map(x=>x.g),portal,pi],true)[0];if(!hit)return;
+ if(hit.object===portal||hit.object===pi){if(hit.distance>10)return toast('اقترب أكثر من البوابة');return S.badges[1]&&S.badges[2]&&S.badges[3]?exam():toast('أكمل القاعات الثلاث أولًا')}
+ const ly=hit.object.userData.layer;let o=hit.object;while(o&&o.userData.i===undefined)o=o.parent;if(!o)return;if(FC&&FC.i==o.userData.i){if(ly!==undefined)usePart(ly);return}if(hit.distance>16)return toast('اقترب أكثر من المعروض');openEx(o.userData.i)}
+let near=null;
+const mp=$('map').getContext('2d');
+function minimap(){mp.clearRect(0,0,120,120);mp.fillStyle='#e0a84a66';RC.forEach(r=>{if(r[4]())mp.fillRect((r[0]+50)*1.2,(r[2]+50)*1.2,(r[1]-r[0])*1.2,(r[3]-r[2])*1.2)});
+ mp.fillStyle='#ffd34a';EX.forEach(e=>{mp.fillStyle=S.seen[e.i]?'#4bd08a':'#ffd34a';mp.fillRect((e.p.x+50)*1.2-1.5,(e.p.z+50)*1.2-1.5,3,3)});
+ mp.fillStyle='#fff';mp.beginPath();mp.arc((cam.position.x+50)*1.2,(cam.position.z+50)*1.2,4,0,7);mp.fill();
+ mp.strokeStyle='#fff';mp.beginPath();mp.moveTo((cam.position.x+50)*1.2,(cam.position.z+50)*1.2);mp.lineTo((cam.position.x-Math.sin(yaw)*8+50)*1.2,(cam.position.z-Math.cos(yaw)*8+50)*1.2);mp.stroke()}
+let last=performance.now(),running=false;
+function loop(t){requestAnimationFrame(loop);const dt=Math.min((t-last)/1000,.1);last=t;if(!running)return;
+ if(keys.ArrowLeft)yaw+=1.8*dt;if(keys.ArrowRight)yaw-=1.8*dt;
+ let f=(keys.w||keys.ArrowUp?1:0)-(keys.s||keys.ArrowDown?1:0),s=(keys.d?1:0)-(keys.a?1:0);
+ const sp=(busy||FC)?0:5*dt,dx=(-Math.sin(yaw)*f+Math.cos(yaw)*s)*sp,dz=(-Math.cos(yaw)*f-Math.sin(yaw)*s)*sp,p=cam.position;
+ if(walk(p.x+dx,p.z))p.x+=dx;if(walk(p.x,p.z+dz))p.z+=dz;
+ tick(dt);cam.rotation.set(pit,yaw,0);
+ near=null;let bd=5;EX.forEach(e=>{if(!(FC&&FC.i==e.i))e.sp.rotation.y+=dt*.6;e.mk.rotation.y+=dt*2;e.lt.lookAt(p.x,e.lt.getWorldPosition(new THREE.Vector3()).y,p.z);e.mk.position.y=3.3+Math.sin(t/400+e.i)*.1;const d=Math.hypot(e.p.x-p.x,e.p.z-p.z);if(d<bd){bd=d;near=e}});
+ $('hint').style.display=near?'block':'none';if(near)$('hint').textContent='اضغط E أو زر «تفاعل»: '+D[near.i][2];
+ gl.rotation.y+=dt*.3;portal.rotation.z+=dt;minimap();R.render(sc,cam)}
+requestAnimationFrame(loop);
+
+/* ---------- البداية ---------- */
+let av=S.av;$('nm').value=S.name;
+document.querySelectorAll('#av b').forEach(b=>{if(b.dataset.a==av)b.classList.add('on');b.onclick=()=>{document.querySelectorAll('#av b').forEach(x=>x.classList.remove('on'));b.classList.add('on');av=b.dataset.a}});
+if(S.name)$('go').textContent='متابعة الرحلة';
+$('go').onclick=()=>{const n=$('nm').value.trim();if(!n){$('nm').focus();return}S.name=n;S.av=av;$('start').style.display='none';$('hud').style.display='flex';$('map').style.display='block';running=true;hud();save();
+ if(innerWidth<=700)$('tc').style.display='flex';ac=ac||null;
+ toast('مرحبًا أيها المستكشف '+n+'! ابدأ من القاعة الأولى (الشمال)');};
+$('snd').onclick=()=>{sound=!sound;if(!sound&&window.speechSynthesis)speechSynthesis.cancel();$('snd').textContent=sound?'🔊':'🔇'};
+$('cardb').onclick=card;
+const VT={earth:'رحلة إلى باطن الأرض',tec:'التراكيب الجيولوجية',rock:'دورة الصخور',min:'عالم المعادن والبلورات'};
+const VD={earth:['أهلاً بك في رحلتنا إلى باطن الأرض. الأرض ليست كتلة واحدة صلبة، بل تتكون من طبقات متراصة.','أولاً القشرة الأرضية، وهي الطبقة الخارجية الرقيقة التي نعيش عليها. وهي نوعان: قارية جرانيتية، ومحيطية بازلتية.','تحتها الوشاح، وهو أسمك الطبقات. جزؤه العلوي لدن مائع يسمى الأسينوسفير، وفيه تتحرك تيارات الحمل ببطء شديد.','وفي المركز يوجد اللب. الخارجي سائل من الحديد والنيكل، والداخلي صلب شديد الكثافة بسبب الضغط الهائل.','وبذلك عرفنا طبقات الأرض: القشرة، والوشاح، واللب. أحسنت!'],
+tec:['مرحباً بك! تبدأ الطبقات الرسوبية أفقية ومنتظمة. فماذا يحدث لها عندما تتعرض لقوى هائلة من باطن الأرض؟','عند تعرض الطبقات لقوى ضغط جانبية، تنثني وتتكون الطيات. المنحني لأعلى يسمى طية محدبة، والمنحني لأسفل يسمى طية مقعرة.','وإذا زادت القوى فتكسرت الصخور، يتكون فالق. في الفالق العادي ينزلق الجدار العلوي إلى أسفل بسبب قوى الشد.','أما في الفالق المعكوس، فتدفع قوى الضغط الجدار العلوي إلى أعلى فوق الجدار السفلي.','وعندما يتوقف الترسيب وتحدث تعرية، ثم تترسب طبقات جديدة، ينشأ سطح عدم التوافق. وهنا طبقات أفقية فوق طبقات مائلة، وهو عدم توافق زاوي. أحسنت!'],
+rock:['أهلاً بك! الصخور في الطبيعة لا تبقى كما هي، بل تتحول من نوع إلى آخر في دورة مستمرة تسمى دورة الصخور.','تتعرض الصخور النارية للتجوية، ثم تنتقل نواتجها، وتترسب وتتصلب، فتتكون الصخور الرسوبية.','وعندما تتعرض الصخور الرسوبية لحرارة شديدة وضغط كبير، تتحول إلى صخور متحولة، كتحول الحجر الجيري إلى رخام.','وإذا ارتفعت الحرارة أكثر، تنصهر الصخور وتتكون الصهارة. وعندما تبرد وتتبلور، تتكون الصخور النارية من جديد.','وهكذا تدور الصخور دورة لا تنتهي. أحسنت!'],
+min:['مرحباً بك في عالم المعادن! المعدن مادة صلبة غير عضوية، تتكون في الطبيعة، ولها تركيب كيميائي محدد وشكل بلوري مميز.','تتحدد الأنظمة البلورية بأطوال المحاور البلورية والزوايا بينها، وهي سبعة أنظمة رئيسية، منها المكعب والرباعي والمعيني القائم.','ومن أهم الخواص الفيزيائية الصلادة، وهي مقاومة المعدن للخدش. ونقيسها بمقياس موهس، من واحد وهو التلك، إلى عشرة وهو الألماس.','المعدن الأصلد يخدش الأقل صلادة. فإذا خدشت عينة الأرثوكليز ولم تخدش التوباز، فصلادتها سبعة، وهي الكوارتز. أحسنت!']};
+function vsay(t,cb){if(!sound||!window.speechSynthesis)return;speechSynthesis.cancel();let x=t;PR.forEach(([a,b])=>x=x.replace(a,b));const ps=x.split(/(?<=[.،:؟!])\s+/).filter(Boolean).reduce((a,s)=>{if(a.length&&a[a.length-1].length+s.length<220)a[a.length-1]+=' '+s;else a.push(s);return a},[]);if(!VO)pickV();ps.forEach((p,i)=>{const u=new SpeechSynthesisUtterance(p);u.lang=VO?VO.lang:'ar-EG';if(VO)u.voice=VO;u.rate=1.2;u.pitch=window.VPT||1.05;if(i==ps.length-1)u.onend=cb;speechSynthesis.speak(u)})}
+function vdraw(k,c,si,p,t){const W=960,H=540,E=x=>x*x*(3-2*x);
+ let g=c.createLinearGradient(0,0,0,H);g.addColorStop(0,'#071433');g.addColorStop(1,'#1a0f3a');c.fillStyle=g;c.fillRect(0,0,W,H);
+ c.fillStyle='#fff';for(let i=0;i<60;i++){c.globalAlpha=.3+.4*Math.abs(Math.sin(t+i));c.fillRect((i*137)%W,(i*71)%H,2,2)}c.globalAlpha=1;
+ c.textAlign='center';c.direction='rtl';c.font='bold 34px Cairo,Tahoma';c.fillStyle='#ffd166';c.fillText(VT[k],W/2,52);
+ if(k=='earth'){const R=185*(si==0?E(p):1)*(1+.01*Math.sin(t*3)),X=330,Y=300,L=[['القشرة','#4f9d5a',1],['الوشاح العلوي (الأسينوسفير)','#f08a3c',.93],['الوشاح السفلي','#c9532f',.74],['اللب الخارجي','#f2c94c',.55],['اللب الداخلي','#fff2b0',.28]],hl=[[],[0],[1,2],[3,4],[]][si];
+  L.forEach((l,i)=>{c.fillStyle=l[1];c.beginPath();c.arc(X,Y,R*l[2],0,7);c.fill();if(hl.length&&!hl.includes(i)){c.fillStyle='rgba(5,8,20,.65)';c.fill()}});
+  L.forEach((l,i)=>{c.globalAlpha=hl.length&&!hl.includes(i)?.35:1;c.fillStyle=l[1];c.fillRect(905,150+i*60,22,22);c.fillStyle='#fff';c.font='22px Cairo,Tahoma';c.textAlign='right';c.fillText(l[0],895,170+i*60)});c.globalAlpha=1;
+  if(si==2)for(let i=0;i<8;i++){const a=t*.6+i*.785;c.fillStyle='#fff';c.beginPath();c.arc(X+Math.cos(a)*R*.66,Y+Math.sin(a)*R*.66,6,0,7);c.fill()}}
+ else if(k=='tec'){const cl=['#d9b36c','#a8744a','#e5cf9a','#8a5a3a','#c2955a'],x0=140,x1=820,y0=230,th=34,m=480,e=E(p);c.textAlign='center';
+  const off=x=>si==1?Math.sin((x-x0)/(x1-x0)*Math.PI*3)*38*e:si==2?(x>m?45*e:0):si==3?(x>m?-45*e:0):0;
+  if(si<4){for(let b=0;b<5;b++){c.fillStyle=cl[b];c.beginPath();for(let x=x0;x<=x1;x+=8)c.lineTo(x,y0+b*th+off(x));for(let x=x1;x>=x0;x-=8)c.lineTo(x,y0+b*th+th+off(x));c.fill()}}
+  else{c.save();c.beginPath();c.rect(x0,y0+90,x1-x0,200);c.clip();c.translate(480,y0+190);c.rotate(-.3);for(let b=0;b<9;b++){c.fillStyle=cl[b%5];c.fillRect(-500,-200+b*34,1000,34)}c.restore();for(let b=0;b<2;b++){c.fillStyle=cl[b+2];c.fillRect(x0,y0+20+b*35,x1-x0,35)}c.strokeStyle='#ff5f6d';c.lineWidth=4;c.setLineDash([12,8]);c.beginPath();c.moveTo(x0,y0+90);c.lineTo(x1,y0+90);c.stroke();c.setLineDash([])}
+  if(si==2||si==3){c.strokeStyle='#fff';c.lineWidth=3;c.setLineDash([10,8]);c.beginPath();c.moveTo(m,y0-30);c.lineTo(m,y0+5*th+30);c.stroke();c.setLineDash([])}
+  c.fillStyle='#fff';c.font='bold 30px Cairo,Tahoma';c.fillText(['طبقات أفقية','طية (قوى ضغط ↔)','فالق عادي (قوى شد)','فالق معكوس (قوى ضغط)','سطح عدم توافق زاوي'][si],W/2,455)}
+ else if(k=='rock'){const N={ign:[480,130,'الصخور النارية','#e86a4a'],mag:[480,300,'الصهارة','#ff9f43'],sed:[790,420,'الصخور الرسوبية','#d9b25f'],met:[170,420,'الصخور المتحولة','#9b7bd4']},A=[['ign','sed','التجوية والنقل والترسيب'],['sed','met','حرارة وضغط'],['met','mag','انصهار'],['mag','ign','تبريد وتبلور']],ac=[[0,1,2,3],[0],[1],[2,3],[0,1,2,3]][si];
+  A.forEach((a,i)=>{const [x1,y1]=N[a[0]],[x2,y2]=N[a[1]];c.globalAlpha=ac.includes(i)?1:.2;c.strokeStyle='#7ae7ff';c.lineWidth=5;c.beginPath();c.moveTo(x1,y1);c.lineTo(x2,y2);c.stroke();const f=(t*.4+i*.25)%1;c.fillStyle='#fff';c.beginPath();c.arc(x1+(x2-x1)*f,y1+(y2-y1)*f,9,0,7);c.fill();c.fillStyle='#ffd166';c.font='20px Cairo,Tahoma';c.fillText(a[2],(x1+x2)/2,(y1+y2)/2-12)});c.globalAlpha=1;
+  Object.values(N).forEach(n=>{c.fillStyle=n[3];c.fillRect(n[0]-110,n[1]-32,220,64);c.fillStyle='#111';c.font='bold 22px Cairo,Tahoma';c.fillText(n[2],n[0],n[1]+8)})}
+ else{if(si<2){const a=[[1,1,1],[1,1,1.6],[.8,1.2,1.7]],q=si==0?0:Math.min(2,Math.floor(p*3)),s3=a[q],an=t*.9,ca=Math.cos(an),sa=Math.sin(an),ct=Math.cos(.5),st=Math.sin(.5),V=[];
+  for(let i=0;i<8;i++){const v=[(i&1?1:-1)*s3[0],(i&2?1:-1)*s3[1],(i&4?1:-1)*s3[2]],x=v[0]*ca+v[2]*sa,z=-v[0]*sa+v[2]*ca,y=v[1]*ct-z*st,z2=v[1]*st+z*ct,f=520/(520+z2*90);V.push([480+x*95*f,260+y*95*f])}
+  c.strokeStyle='#7ae7ff';c.lineWidth=4;c.shadowColor='#7ae7ff';c.shadowBlur=18;for(let i=0;i<8;i++)for(let j=i+1;j<8;j++){const d=i^j;if(d==1||d==2||d==4){c.beginPath();c.moveTo(...V[i]);c.lineTo(...V[j]);c.stroke()}}c.shadowBlur=0;
+  c.fillStyle='#fff';c.font='bold 30px Cairo,Tahoma';c.fillText(si==0?'بلورة معدنية':['النظام المكعب','النظام الرباعي','النظام المعيني القائم'][q],W/2,490)}
+  else{MO.forEach((m,i)=>{const h=(i+1)*28*E(Math.min(1,p*1.5)),x=60+i*84,dim=si==3&&i!=6;c.globalAlpha=dim?.3:1;c.fillStyle='hsl('+(200+i*16)+',80%,60%)';c.fillRect(x,490-h,64,h);c.fillStyle='#fff';c.font='15px Cairo,Tahoma';c.fillText(m[0],x+32,510);c.fillText(m[1],x+32,482-h)});c.globalAlpha=1}}}
+let VL=0,VP=false,VS=0,VK='earth';
+function playVid(key){const k={globe:'earth',earth:'earth',prim:'tec',folds:'tec',faults:'tec',uncon:'tec',cycle:'rock',ign:'rock',sed:'rock',meta:'rock'}[key]||'min',tx=VD[k];stopClip();VK=k;
+ let box=$('vid');if(!box){box=document.createElement('div');box.id='vid';box.innerHTML='<div class="vw"><canvas id="vc" width="960" height="540"></canvas><div id="vcap"></div><div class="vb"><button id="vpp">⏸</button><button id="vrp">↺</button><div id="vbar"><i id="vbf"></i></div><button id="vx">✖</button></div></div>';document.body.appendChild(box)}
+ box.style.display='flex';const cx=$('vc').getContext('2d'),my=++VL;let si=0,tk=0,t0=0,du=1;VP=false;$('vpp').textContent='⏸';
+ const go=n=>{const m=++tk;si=n;VS=n;if(n>=tx.length){$('vcap').textContent='انتهى الفيديو 🎉';$('vbf').style.width='100%';if(window.confetti)confetti();return}const s=tx[n];$('vcap').textContent=s;t0=performance.now();du=Math.max(3000,s.length*52);let d=false;const nx=()=>{if(!d&&m==tk&&!VP){d=true;go(n+1)}};vsay(s,nx);setTimeout(nx,(sound&&window.speechSynthesis?du*2+3000:du+600))};
+ $('vpp').onclick=()=>{VP=!VP;$('vpp').textContent=VP?'▶':'⏸';if(VP){tk++;window.speechSynthesis&&speechSynthesis.cancel()}else go(si)};$('vrp').onclick=()=>{VP=false;$('vpp').textContent='⏸';go(0)};$('vx').onclick=()=>{VL++;tk++;window.speechSynthesis&&speechSynthesis.cancel();box.style.display='none'};
+ const fr=now=>{if(my!=VL)return;const p=Math.min(1,(now-t0)/du);if(si<tx.length&&!VP){vdraw(VK,cx,si,p,now/1000);$('vbf').style.width=((si+p)/tx.length*100)+'%'}requestAnimationFrame(fr)};go(0);requestAnimationFrame(fr)}
+function confetti(){const k=document.createElement('canvas');k.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:99';k.width=innerWidth;k.height=innerHeight;document.body.appendChild(k);const x=k.getContext('2d'),P=Array.from({length:90},()=>({x:innerWidth/2,y:innerHeight*.6,vx:(Math.random()-.5)*14,vy:-Math.random()*14-4,c:'hsl('+Math.random()*360+',90%,60%)'}));let f=0;(function a(){x.clearRect(0,0,k.width,k.height);P.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.4;x.fillStyle=p.c;x.fillRect(p.x,p.y,8,5)});if(++f<90)requestAnimationFrame(a);else k.remove()})()}
+new MutationObserver(()=>{const b=document.querySelector('#eb b');if(b&&$('exam').style.display!='none'){const o=[...document.querySelectorAll('#eb .opt')].map(x=>x.textContent).join('، ');speak(b.textContent+'. '+o)}}).observe($('eb'),{childList:true});
+{const PT=[1,.8,1.25];let pi=0;$('vn').onclick=()=>{const s=$('vs');if(s.options.length>1){s.selectedIndex=(s.selectedIndex+1)%s.options.length;s.onchange&&s.onchange()}pi=(pi+1)%3;window.VPT=PT[pi];speak('مرحباً بك في المتحف الجيولوجي الافتراضي')}}
+const _beep=beep,_toast=toast;beep=(f,d)=>{_beep(f,d);if(f==880)confetti()};toast=m=>{_toast(m);if(/🏅/.test(m))confetti()};
+
+/* ===== النسخة المتحفية v2 ===== */
+let busy=false,Q=[],seg=null,cbk=null,FC=null,ts=0,gOn=true,gReady=false,lz=-1,gH=0,gPos=[3,6];
+const NM=['البهو الرئيسي','قاعة الأرض والتراكيب الجيولوجية','قاعة المعادن والبلورات','قاعة الصخور والدورة الجيولوجية'];
+const zone=()=>{const p=cam.position;return p.z<-12?1:p.x>12?2:p.x<-12?3:0};
+const P={1:[[0,-24],[0,-17],[0,-9]],2:[[24,0],[17,0],[9,0]],3:[[-24,0],[-17,0],[-9,0]]};
+const DIR={1:[0,1,0],2:[-1,0,-Math.PI/2],3:[1,0,Math.PI/2]};
+function view(i,dist){const d=D[i],h=d[0],o=(h==1?L1:h==2?L2:L3)[d[1]],c=HALL[h].c,v=DIR[h],ex=c[0]+o[0],ez=c[1]+o[1];return{h,ex,ez,x:ex+v[0]*dist,z:ez+v[1]*dist,yaw:v[2]}}
+function route(h,x,z,yaw,pit,cb){const z0=zone();let L=[];if(z0!=h){if(z0){L.push(...P[z0]);if(h)L.push([0,0])}if(h)L.push(...P[h].slice().reverse())}L.push([x,z]);
+ Q=L.map((p,j)=>{const n=L[j+1];return n?{x:p[0],z:p[1],yaw:Math.atan2(-(n[0]-p[0]),-(n[1]-p[1])),pit:-.05}:{x:p[0],z:p[1],yaw,pit}});seg=null;cbk=cb;busy=true}
+function tick(dt){
+ if(FC&&!busy&&(keys.w||keys.s||keys.a||keys.d||keys.ArrowUp||keys.ArrowDown)){$('modal').style.display='none';document.body.classList.remove('mo');unfocus(true)}
+ if(busy){if(!seg){if(!Q.length){busy=false;const c=cbk;cbk=null;c&&c();return}const n=Q.shift(),p=cam.position;seg={f:[p.x,p.z,yaw,pit],t:n,k:0,d:Math.max(.7,Math.hypot(n.x-p.x,n.z-p.z)/7),dy:((n.yaw-yaw+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI}}
+  seg.k+=dt/seg.d;const k=Math.min(seg.k,1),e=k*k*(3-2*k),p=cam.position;p.x=seg.f[0]+(seg.t.x-seg.f[0])*e;p.z=seg.f[1]+(seg.t.z-seg.f[1])*e;yaw=seg.f[2]+seg.dy*e;pit=seg.f[3]+(seg.t.pit-seg.f[3])*e;if(seg.k>=1)seg=null}
+ if(FC){const u=FC.m.userData;if(u.t){const b=u.blk;b.position.y+=(u.t[0]-b.position.y)*.08;b.position.z+=(u.t[1]-b.position.z)*.08;b.rotation.z+=(u.t[2]-b.rotation.z)*.08}}
+ if(clipOn&&FC)FC.e.sp.rotation.y+=dt*.7;EX[11].sp.children[0].userData.ar.rotation.y-=dt*.8;
+ const z=zone();if(z!==lz){lz=z;$('hall').textContent=NM[z]}
+ GD.position.x+=(gPos[0]-GD.position.x)*.06;GD.position.z+=(gPos[1]-GD.position.z)*.06;GD.lookAt(cam.position.x,GD.position.y,cam.position.z)}
+let clipOn=false,clipT=0;
+const PR=[[/التجوية/g,'التَّجْوِيَة'],[/الترسيب/g,'التَّرْسِيب'],[/الصلادة/g,'الصَّلَادَة'],[/المخدش/g,'المِخْدَش'],[/الانفصام/g,'الِانْفِصَام'],[/المكسر/g,'المِكْسَر'],[/البريق/g,'البَرِيق'],[/الفوالق/g,'الفَوَالِق'],[/الطيات/g,'الطَّيَّات'],[/محدبة/g,'مُحَدَّبَة'],[/مقعرة/g,'مُقَعَّرَة'],[/الوشاح/g,'الوِشَاح'],[/القشرة/g,'القِشْرَة'],[/اللب(?![ء-ي])/g,'اللُّبّ'],[/البازلت/g,'البَازَلْت'],[/الجرانيت/g,'الجْرَانِيت'],[/الرخام/g,'الرُّخَام'],[/الكوارتز(?!يت)/g,'الكُوَارْتْز'],[/الكالسيت/g,'الكَالْسِيت'],[/الفلوريت/g,'الفُلُورِيت'],[/التوباز/g,'التُّوبَاز'],[/الجبس/g,'الجِبْس'],[/التلك/g,'التَّلْك'],[/الألماس/g,'الأَلْمَاس'],[/الكوراندوم/g,'الكُورَنْدُم'],[/الأباتيت/g,'الأَبَاتِيت'],[/متورقة/g,'مُتَوَرِّقَة'],[/الصهارة/g,'الصَّهَارَة'],[/الأسينوسفير|الأستينوسفير/g,'الأَسْثِينُوسْفِير'],[/بوين/g,'بُوِين'],[/بورفيري\w*/g,'بُورْفِيرِيّ'],[/موهس/g,'مُوهْس'],[/دوليرايت/g,'دُولِيرَايْت'],[/النيم/g,'النِّيم'],[/السيال/g,'السِّيَال'],[/سيما/g,'سِيمَا'],[/هورست/g,'هُورْسْت'],[/جرابن/g,'جْرَابِن'],[/الأرثوكليز/g,'الأُورْثُوكْلِيز'],[/الأوبسيديان/g,'الأُوبْسِيدْيَان'],[/الكوارتزيت/g,'الكُوَارْتْزِيت'],[/النيس/g,'النَّايْس'],[/الشيست/g,'الشِّيسْت'],[/XP/g,'نقطة']];
+let VO=null;const pickV=()=>{const a=speechSynthesis.getVoices().filter(v=>/^ar/i.test(v.lang));const pr=v=>(/natural|online/i.test(v.name)?4:0)+(/google|hoda|salma|shakir|naayf|zariyah|laila|maged/i.test(v.name)?2:0)+(/EG/i.test(v.lang)?1:0);a.sort((x,y)=>pr(y)-pr(x));const sel=$('vs');if(sel&&!sel.options.length){a.forEach((v,i)=>sel.add(new Option(v.name,i)));sel.onchange=()=>{VO=a[sel.value]}}VO=VO||a[0]||null};
+if(window.speechSynthesis){speechSynthesis.onvoiceschanged=pickV;pickV()}
+function speak(t){if(!sound||!window.speechSynthesis)return;speechSynthesis.cancel();let x=String(t).replace(/<[^>]+>/g,' ');PR.forEach(([a,b])=>x=x.replace(a,b));const ps=x.split(/(?<=[.،:؟!])\s+/).filter(Boolean).reduce((a,s)=>{if(a.length&&a[a.length-1].length+s.length<220)a[a.length-1]+=' '+s;else a.push(s);return a},[]);if(!VO)pickV();ps.forEach(p=>{const u=new SpeechSynthesisUtterance(p);u.lang=VO?VO.lang:'ar-EG';if(VO)u.voice=VO;u.rate=1.2;u.pitch=window.VPT||1;speechSynthesis.speak(u)})}
+function speakOld(t){if(!sound||!window.speechSynthesis)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(t).replace(/<[^>]+>/g,' '));u.lang='ar-SA';u.rate=.92;const v=speechSynthesis.getVoices().find(v=>v.lang&&v.lang.indexOf('ar')==0);if(v)u.voice=v;speechSynthesis.speak(u)}
+function stopClip(){clipOn=false;clearTimeout(clipT);if(window.speechSynthesis)speechSynthesis.cancel()}
+function playClip(i){stopClip();const d=D[i],pt=PARTS[d[4]],list=pt?pt.map((p,k)=>[k,p[0]+'. '+p[1].replace(/<br>/g,'، ')]):[[-1,d[3]]];clipOn=true;let j=0;
+ const go=()=>{if(!clipOn||!FC||FC.i!=i){clipOn=false;return}if(j>=list.length){clipOn=false;$('gt').textContent='انتهى العرض التوضيحي.';speak('انتهى العرض التوضيحي.');return}const a=list[j++],t=a[1].replace(/<[^>]+>/g,' ');if(a[0]>=0)usePart(a[0]);$('gt').textContent=t;speak(t);clipT=setTimeout(go,Math.max(2500,t.length*60))};go()}
+/* المرشد */
+const GD=grp();{const b=mesh(new G.CylinderGeometry(.3,.42,1.1,16),'#2f7a6b'),h=mesh(new G.SphereGeometry(.24,16,12),'#e8b890'),h1=mesh(new G.CylinderGeometry(.34,.34,.05,16),'#7a5535'),h2=mesh(new G.CylinderGeometry(.2,.22,.2,16),'#7a5535');b.position.y=.55;h.position.y=1.35;h1.position.y=1.55;h2.position.y=1.65;GD.add(b,h,h1,h2);const l=sign('المرشد',.9,.3,'#2f7a6b');l.position.y=2.1;GD.add(l)}
+GD.position.set(3,0,6);sc.add(GD);
+const desk=mesh(new G.BoxGeometry(4,1.1,1.2),'#6b4a2c');desk.position.set(5,.55,-8);sc.add(desk);
+put(sign('خريطة المتحف: شمالًا الأرض • شرقًا المعادن • غربًا الصخور',6,1.4),-11.7,2.6,-7,Math.PI/2);
+function place(i){const v=view(i,0),dv=DIR[v.h],pp=[-dv[1],dv[0]];gPos=[v.ex+dv[0]*2+pp[0]*2.2,v.ez+dv[1]*2+pp[1]*2.2];if(gH!=v.h){gH=v.h;GD.position.x=gPos[0];GD.position.z=gPos[1]}}
+const T=[{s:'أهلًا بك في «أسرار كوكب الأرض». أنا مرشدك، وسأرافقك بين القاعات الثلاث.'},{s:'تحرّك بمفاتيح W A S D أو أزرار اللمس، وانظر بسحب الماوس. انقر أي معروض لتقريبه وتدويره وقراءة تفاصيله. ويمكنك الاستكشاف بنفسك في أي وقت.',nl:'ابدأ الجولة'},
+...D.map((d,i)=>({ex:i,s:(d[1]==0?'نصل الآن إلى '+HALL[d[0]].n+'. ':'')+'هنا «'+d[2]+'». '+d[3].split('.')[0]+'. اضغط «استكشف المعروض» ثم تابع.'})),{portal:1,s:'أنهيت الجولة! اتجه إلى بوابة الاختبار النهائي، أو أعد زيارة أي قاعة من الدليل.'}];
+function renderG(r){gReady=r;const s=T[ts];$('gd').style.display=gOn?'block':'none';$('gt').textContent=s.s;let b='';
+ if(ts<T.length-1){const nh=T[ts+1].ex!=null&&s.ex!=null&&D[T[ts+1].ex][0]!=D[s.ex][0],dis=!r||(s.ex!=null&&!S.seen[s.ex]);b+=`<button id="gn" ${dis?'disabled style="opacity:.5"':''}>${s.nl||(nh?'الانتقال إلى القاعة التالية':'التالي')}</button>`}else b+='<button id="gx">بدء الاختبار النهائي</button><button class="s" id="g0">إعادة الجولة</button>';
+ if(ts>0||s.ex!=null)b+='<button class="s" id="gr">إعادة الشرح</button>';if(s.ex!=null)b+='<button class="s" id="ge">استكشف المعروض</button>';$('gb').innerHTML=b;
+ const q=id=>$(id)&&($(id).onclick=null,$(id));
+ if(q('gn'))$('gn').onclick=()=>runStep(ts+1);if(q('gx'))$('gx').onclick=()=>S.badges[1]&&S.badges[2]&&S.badges[3]?exam():toast('أكمل القاعات الثلاث أولًا');if(q('g0'))$('g0').onclick=()=>runStep(0);
+ if(q('gr'))$('gr').onclick=()=>{const tx=s.ex!=null?D[s.ex][3]:s.s;$('gt').textContent=tx;speak(tx)};if(q('ge'))$('ge').onclick=()=>openEx(s.ex)}
+function runStep(n){if(n<0||n>=T.length)return;const s=T[n];if(s.ex!=null){const h=D[s.ex][0];if(h>1&&!S.badges[h-1])return toast('أكمل القاعة السابقة أولًا')}
+ ts=n;S.ts=n;save();if(FC){$('modal').style.display='none';document.body.classList.remove('mo');unfocus(true)}renderG(false);
+ if(s.ex!=null){const v=view(s.ex,4);route(v.h,v.x,v.z,v.yaw,-.12,()=>{place(s.ex);renderG(true);speak(s.s)})}
+ else if(s.portal)route(0,-8,3.5,Math.PI,0,()=>{gPos=[-6,5];gH=0;renderG(true);speak(s.s)});else route(0,0,8,0,0,()=>{gPos=[2.5,5];gH=0;renderG(true);speak(s.s)})}
+/* المعروضات */
+function hlEx(e,on){e.sp.traverse(m=>{if(m.material&&m.material.emissive){if(on){m.userData.oe=m.material.emissive.getHex();m.material.emissive.setHex(0x3a2a08)}else if(m.userData.oe!==undefined)m.material.emissive.setHex(m.userData.oe)}})}
+function unfocus(silent){const f=FC;if(!f)return;stopClip();hlEx(f.e,false);f.e.sp.scale.setScalar(1.1);FC=null;if(!silent){const v=view(f.i,4);route(v.h,v.x,v.z,v.yaw,-.12,()=>{})}}
+function zoomEx(f){const s=FC.e.sp;s.scale.setScalar(Math.max(.7,Math.min(1.9,s.scale.x*f)))}
+function show(html){$('mb').innerHTML=html+'<div class="row"><button class="s" id="cl">إغلاق / عرض عام</button></div>';$('modal').style.display='flex';document.body.classList.add('mo');$('cl').onclick=closeP}
+function closeP(){$('modal').style.display='none';document.body.classList.remove('mo');if(FC)unfocus(false)}
+const mkr=(m,o)=>{const old=m.getObjectByName('mk');old&&m.remove(old);o.name='mk';m.add(o)};
+const MB=(geo,c)=>new G.Mesh(geo,new G.MeshBasicMaterial({color:c,transparent:true,opacity:.7,side:2}));
+const hc=(m,k)=>m.children.forEach((x,j)=>{if(x.material&&x.material.emissive)x.material.emissive.setHex(j==k?0x664400:0)});
+const LAY=[['القشرة القارية','الطبقة الخارجية للقارات','صلبة','سيال جرانيتية (سيليكا وألومنيوم)','أقل كثافة وأسمك من المحيطية'],['القشرة المحيطية','تحت قيعان المحيطات','صلبة','سيما بازلتية (سيليكا ومغنيسيوم)','أرق وأكثف من القارية'],['الوشاح العلوي','أسفل القشرة','لدنة مائعة (الأسينوسفير)','سيليكات الحديد والمغنيسيوم','تتصرف كالسوائل وتسمح بتيارات الحمل'],['الوشاح السفلي','أسفل الوشاح العلوي','صلب','سيليكات كثيفة','حرارة وضغط عاليان'],['اللب الخارجي','حول اللب الداخلي','مصهور','حديد ونيكل','حركته مصدر المجال المغناطيسي'],['اللب الداخلي','مركز الأرض','صلب','حديد ونيكل','عالي الكثافة، والضغط يبقيه صلبًا']];
+const FA=[['فالق عادي','الجدار العلوي يهبط بفعل قوى الشد.',[-.3,0,-.12]],['فالق معكوس','الجدار العلوي يرتفع بفعل الضغط.',[.35,0,-.12]],['فالق دسر','معكوس منخفض الزاوية يركب فيه جزء كبير فوق آخر.',[.3,0,-.5]],['ذو حركة أفقية','تنزلق الكتلتان أفقيًا بجوار بعضهما.',[.1,.6,-.12]],['فالق بارز','كتلة مرتفعة بين فالقين عاديين.',[.45,0,-.12]],['فالق خندقي','كتلة هابطة بين فالقين عاديين.',[-.45,0,-.12]]];
+const SY=[['مكعب','ثلاثة محاور متساوية متعامدة.'],['رباعي','محوران متساويان والثالث مختلف، وكلها متعامدة.'],['معيني قائم','ثلاثة محاور مختلفة متعامدة.'],['سداسي','ثلاثة محاور أفقية متساوية بزاوية 120° ورابع رأسي.'],['ثلاثي','محاور كالسداسي بتماثل ثلاثي.'],['أحادي الميل','ثلاثة محاور مختلفة، اثنان متعامدان والثالث مائل.'],['ثلاثي الميل','ثلاثة محاور مختلفة وجميعها مائلة.']];
+const CY=[['التجوية','تفتت الصخور وتحللها عند السطح بالماء والرياح والحرارة.',1],['النقل','حمل نواتج التجوية بالماء والرياح والجليد.',1],['الترسيب','تراكم الرواسب في الأحواض فتتكون رسوبية.',1],['الانصهار','تحول الصخور إلى صهير في الأعماق بالحرارة الشديدة.',0],['التبريد والتبلور','تصلب الصهير وتبلوره إلى صخر ناري.',0],['التحول','تغير الصخر وهو صلب بالحرارة والضغط فيصير متحولًا.',2]];
+const MN=[['الذهب','عنصري','أصفر ذهبي، بريق معدني','أصفر','معتم','2.5–3','مكسر خطافي بلا انفصام','مكعب'],['الكبريت','عنصري','أصفر، بريق راتنجي','أبيض مصفر','شفاف إلى نصف شفاف','1.5–2.5','مكسر محاري','معيني قائم'],['الكوارتز','سيليكات','عديم اللون أو متغير، بريق زجاجي','أبيض','شفاف','7','بلا انفصام، مكسر محاري','سداسي/ثلاثي'],['الكالسيت','كربونات','أبيض، بريق زجاجي','أبيض','شفاف','3','انفصام في ثلاثة اتجاهات','ثلاثي'],['الهيماتيت','أكسيد','رمادي معدني إلى أحمر','بني محمر','معتم','5.5–6.5','مكسر غير منتظم','ثلاثي']];
+const PARTS={earth:LAY.map((l,k)=>[l[0],`الموقع: ${l[1]}<br>الحالة: ${l[2]}<br>التركيب: ${l[3]}<br>الخصائص: ${l[4]}`,m=>m.userData.layers.forEach((x,j)=>x.material.emissive.setHex(j==k?0x553300:0))]),
+folds:[['محدبة','تنحني الطبقات لأعلى وأقدمها في القلب.',m=>{const s=MB(new G.SphereGeometry(.16),'#ff5040');s.position.set(.714,1,0);mkr(m,s)}],['مقعرة','تنحني الطبقات لأسفل وأحدثها في القلب.',m=>{const s=MB(new G.SphereGeometry(.16),'#40a0ff');s.position.set(-.714,.3,0);mkr(m,s)}],['المستوى المحوري','سطح يقسم الطية إلى نصفين متماثلين تقريبًا.',m=>{const s=MB(new G.PlaneGeometry(1.5,1.8),'#ff5040');s.rotation.y=Math.PI/2;s.position.set(.714,.5,0);mkr(m,s)}],['المحور','خط تقاطع المستوى المحوري مع سطح الطبقة.',m=>{const s=MB(new G.CylinderGeometry(.04,.04,1.6),'#ffd34a');s.rotation.x=Math.PI/2;s.position.set(.714,1.02,0);mkr(m,s)}],['الجناحان','جانبا الطية على جانبي المحور.',m=>{const s=grp();[0,1.4].forEach(x=>{const b=MB(new G.SphereGeometry(.13),'#ff9a30');b.position.set(x,.68,.75);s.add(b)});mkr(m,s)}]],
+faults:FA.map(f=>[f[0],f[1]+' (راقب الكتلة اليمنى)',m=>{m.userData.t=f[2]}]),
+uncon:[['متباين','رسوبية فوق نارية أو متحولة.'],['زاوي','طبقات أفقية فوق طبقات مائلة (كما في المجسم).'],['انقطاعي','طبقات متوازية تفصلها فجوة زمنية.']],
+sys:SY.map((y,k)=>[y[0],y[1],m=>hc(m,k)]),cycle:CY.map(c=>[c[0],c[1],m=>hc(m,c[2])]),gold:MN.map(a=>[a[0],`المجموعة: ${a[1]}<br>اللون والبريق: ${a[2]}<br>المخدش: ${a[3]}<br>الشفافية: ${a[4]}<br>الصلادة: ${a[5]}<br>الانفصام والمكسر: ${a[6]}<br>الشكل البلوري: ${a[7]}`])};
+const RK=[['الجرانيت','ناري جوفي','خشن البلورات','تبريد بطيء في الأعماق وسيليكا عالية'],['الدوليرايت','ناري متداخل','متوسط وقد يكون بورفيريًا','تبلور على مرحلتين'],['البازلت','ناري بركاني','ناعم دقيق','تبريد سريع على السطح'],['الحجر الرملي','رسوبي فتاتي','حبيبات رمل متماسكة','ترسيب نواتج التجوية'],['الجبس','رسوبي كيميائي','بلوري','ترسب من محلول بالتبخر'],['الحجر الجيري العضوي','رسوبي عضوي','هياكل كائنات','تراكم بقايا كائنات'],['الرخام','متحول كتلي','حبيبي متبلور','تحول حراري للحجر الجيري'],['النيس','متحول متورق','أشرطة متورقة','حرارة وضغط معًا']];
+function usePart(k){const p=PARTS[D[FC.i][4]][k];if(!p||!$('pt'))return;$('pt').innerHTML='<b>'+p[0]+'</b><br>'+p[1];p[2]&&p[2](FC.m)}
+function openEx(i){const d=D[i],e=EX[i];if(!S.seen[i]){S.seen[i]=1;hud();checkHalls()}
+ if(FC&&FC.i!=i)unfocus(true);
+ if(!FC||FC.i!=i){const v=view(i,2.8);FC={i,e,m:e.sp.children[0]};hlEx(e,true);route(v.h,v.x,v.z,v.yaw,-.15,()=>{})}
+ const fs=d[3].split('.'),def=fs[0]+'.',more=fs.slice(1).join('.').trim(),pt=PARTS[d[4]];let ex='';
+ if(pt)ex+=`<div class="row">${pt.map((p,k)=>`<button class="s" data-p="${k}">${p[0]}</button>`).join('')}</div><div id="pt" class="fbk">اختر عنصرًا لعرض شرحه</div>`;
+ if(d[4]=='earth')ex+='<div class="row"><button class="s" id="ly1">عرض الطبقات الداخلية</button><button class="s" id="ly2">عرض الأرض كاملة</button></div><small>يمكنك أيضًا النقر على أي طبقة في المجسم.</small>';
+ if(d[4]=='mohs'){const o=MO.map((m,k)=>`<option value="${k}">${m[0]}</option>`).join('');ex+=`<p><select id="ma">${o}</select> تخدش <select id="mb2">${o}</select> <button id="mg">جرّب</button></p><p id="mr"></p>`}
+ if(['ign','sed','meta'].includes(d[4])){const o=RK.map((r,k)=>`<option value="${k}">${r[0]}</option>`).join('');ex+=`<p>مقارنة: <select id="ra">${o}</select> <select id="rb2">${o}</select></p><div id="rt"></div>`}
+ show(`<h2>${d[2]}</h2><p>${def}</p>${more?`<details><summary>التفاصيل</summary><p>${more}</p></details>`:''}${ex}<div class="row"><button class="s" id="z1">🔍 تقريب</button><button class="s" id="z2">ابتعاد</button><button class="s" id="z3">↺ إعادة</button><button id="clip">▶ شرح تفاعلي</button><button class="s" id="yt">🎬 شاهد الفيديو</button></div>${qhtml(i)}`);
+ $('z1').onclick=()=>zoomEx(1.15);$('z2').onclick=()=>zoomEx(.87);$('z3').onclick=()=>{e.sp.scale.setScalar(1.1);e.sp.rotation.set(0,0,0)};$('clip').onclick=()=>playClip(i);
+ $('yt').onclick=()=>{playVid(d[4]);return;const VQ={globe:'أهمية علم الجيولوجيا',earth:'طبقات الأرض القشرة الوشاح اللب',prim:'التراكيب الجيولوجية الأولية',folds:'الطيات المحدبة والمقعرة',faults:'الفوالق جيولوجيا',uncon:'أسطح عدم التوافق',gold:'المعادن شرح جيولوجيا',sys:'الأنظمة البلورية',opt:'الخواص البصرية للمعادن',coh:'الصلادة مقياس موهس',mohs:'مقياس موهس للصلادة',cycle:'دورة الصخور',ign:'الصخور النارية',sed:'الصخور الرسوبية',meta:'الصخور المتحولة'},q=encodeURIComponent((VQ[d[4]]||d[2])+' ثالث ثانوي شرح'),K='yt-'+d[4];let v=document.getElementById('vp');if(!v){v=document.createElement('div');v.id='vp';$('mb').insertBefore(v,$('mb').lastChild)}
+  const draw=id=>{v.innerHTML=(id?`<div style="position:relative;padding-top:56.25%;margin:8px 0"><iframe src="https://www.youtube-nocookie.com/embed/${id}?rel=0&hl=ar" style="position:absolute;inset:0;width:100%;height:100%;border:0;border-radius:10px" allow="accelerometer;encrypted-media;picture-in-picture;fullscreen" allowfullscreen></iframe></div>`:'')+`<p><a style="color:#e0a84a" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${q}">🔎 ابحث عن فيديوهات «${VQ[d[4]]||d[2]}» على يوتيوب</a></p><input id="yu" placeholder="ألصق رابط فيديو يوتيوب مناسب هنا" style="width:100%;font-size:14px"><button class="s" id="yg">تشغيل داخل المتحف</button>`;
+   $('yg').onclick=()=>{const m=$('yu').value.match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/);if(m){try{localStorage.setItem(K,m[1])}catch(e){}draw(m[1])}else toast('الرابط غير صحيح')}};
+  let sv=null;try{sv=localStorage.getItem(K)}catch(e){}draw(sv)};
+ document.querySelectorAll('#mb [data-p]').forEach(b=>b.onclick=()=>usePart(+b.dataset.p));
+ if(d[4]=='earth'){const L=FC.m.userData.layers;$('ly1').onclick=()=>{L[0].visible=L[1].visible=false};$('ly2').onclick=()=>L.forEach(x=>x.visible=true)}
+ if($('mg'))$('mg').onclick=()=>{const a=MO[$('ma').value],b=MO[$('mb2').value];$('mr').textContent=a[1]>b[1]?`✔ ${a[0]} (${a[1]}) يخدش ${b[0]} (${b[1]})`:a[1]<b[1]?`✘ ${a[0]} (${a[1]}) لا يخدش ${b[0]} (${b[1]}) بل العكس`:'متساويان في الصلادة';beep(520,.15)};
+ if($('ra')){$('rb2').value=3;const c=()=>{const a=RK[$('ra').value],b=RK[$('rb2').value];$('rt').innerHTML='<table style="width:100%;font-size:14px;border-collapse:collapse">'+['الصخر','النوع','النسيج','التكوين'].map((h,k)=>`<tr><td>${h}</td><td>${a[k]}</td><td>${b[k]}</td></tr>`).join('')+'</table>'};$('ra').onchange=$('rb2').onchange=c;c()}
+ if(d[5])document.querySelectorAll('#mb .opt').forEach(b=>b.onclick=()=>{const k=+b.dataset.k,q=d[5],ok=k==q[2];S.ans[i]=k;document.querySelectorAll('#mb .opt').forEach(x=>{x.classList.remove('ok','no');if(+x.dataset.k==q[2])x.classList.add('ok');else if(+x.dataset.k==k)x.classList.add('no');x.onclick=null});const msg=ok?'ممتاز! إجابة صحيحة. '+q[3]:'الإجابة الصحيحة هي: '+q[1][q[2]]+'. '+q[3];$('fb').textContent=(ok?'✅ ':'❌ ')+msg;$('gt').textContent=msg;speak(msg);if(ok&&!S.ans[i+'f']){S.ans[i+'f']=1;addXP(20)}beep(ok?880:200,.3);save()});
+ if(T[ts]&&T[ts].ex==i)renderG(gReady);$('gt').textContent=d[3];$('gd').style.display=gOn?'block':'none';speak(d[3]+(d[5]?' سؤال. '+d[5][0]+' '+d[5][1].join('، أو '):''))}
+/* الواجهة */
+$('lob').onclick=()=>{if(FC){$('modal').style.display='none';document.body.classList.remove('mo');unfocus(true)}route(0,0,8,0,0,()=>{})};
+$('gtg').onclick=()=>{gOn=!gOn;GD.visible=gOn;$('gd').style.display=gOn?'block':'none'};
+$('bk').onclick=()=>{show('<h2>دليل الزيارة</h2>'+[1,2,3].map(h=>`<b>${HALL[h].n}</b>${S.badges[h]?' 🏅':''}`+D.map((d,i)=>d[0]==h?`<button class="opt" data-g="${i}">${S.seen[i]?'✔ ':''}${d[2]}</button>`:'').join('')).join('')+'<button class="opt" data-g="-1">بوابة الاختبار النهائي</button>');
+ document.querySelectorAll('#mb [data-g]').forEach(b=>b.onclick=()=>{const i=+b.dataset.g;closeP();runStep(i<0?T.length-1:T.findIndex(s=>s.ex==i))})};
+$('go').onclick=()=>{const n=$('nm').value.trim();if(!n){$('nm').focus();return}S.name=n;S.av=av;$('start').style.display='none';$('hud').style.display='flex';$('map').style.display='block';running=true;if(innerWidth<=700)$('tc').style.display='flex';cam.position.set(0,1.7,9);yaw=0;pit=0;hud();runStep(Math.min(S.ts||0,T.length-1))};
+hud();
+
+/* ===== مرحلة الواقعية والمرشد: تُنفَّذ بعد اكتمال كل التعريفات (إصلاح TDZ لـ GD) ===== */
+try{
+(()=>{const Q=THREE;
+const marble=(b,v)=>{const k=document.createElement('canvas');k.width=k.height=512;const x=k.getContext('2d');x.fillStyle=b;x.fillRect(0,0,512,512);for(let i=0;i<26;i++){x.strokeStyle=v;x.globalAlpha=.08+Math.random()*.18;x.lineWidth=.6+Math.random()*2;x.beginPath();let px=Math.random()*512,py=Math.random()*512;x.moveTo(px,py);for(let j=0;j<14;j++){px+=(Math.random()-.4)*60;py+=(Math.random()-.5)*60;x.lineTo(px,py)}x.stroke()}x.globalAlpha=1;for(let i=0;i<3000;i++){x.fillStyle=Math.random()<.5?'rgba(255,255,255,.04)':'rgba(0,0,0,.05)';x.fillRect(Math.random()*512,Math.random()*512,3,3)}x.strokeStyle='rgba(0,0,0,.35)';x.lineWidth=3;x.strokeRect(0,0,512,512);const t=new Q.CanvasTexture(k);t.wrapS=t.wrapT=Q.RepeatWrapping;t.anisotropy=8;return t};
+const fl={'0,0':['#d8dde6','#8a93a6'],'0,-36':['#3a2c20','#c9a36b'],'36,0':['#123530','#6fd1b0'],'-36,0':['#3a1f1c','#d58a72']};
+sc.children.slice().forEach(m=>{if(m.isMesh&&m.geometry.type=='PlaneGeometry'&&Math.abs(m.rotation.x+Math.PI/2)<.01&&m.position.y==0){const p=m.geometry.parameters,f=fl[m.position.x+','+m.position.z]||['#1c2535','#6f8fb0'],t=marble(f[0],f[1]);t.repeat.set(p.width/3,p.height/3);m.material.map=t;m.material.color.set('#ffffff');m.material.roughness=.14;m.material.metalness=.3;m.material.envMapIntensity=1.3;m.material.needsUpdate=true}});
+const mt=new Q.MeshStandardMaterial({color:'#e9e6df',roughness:.25,metalness:.1,envMapIntensity:1.2}),gd=new Q.MeshStandardMaterial({color:'#c9a24a',roughness:.3,metalness:.9}),bmm=new Q.MeshStandardMaterial({color:'#141c2a',roughness:.4,metalness:.7});
+const col=(x,z)=>{const g=new Q.Group(),b=new Q.Mesh(new Q.BoxGeometry(.9,.35,.9),mt),s=new Q.Mesh(new Q.CylinderGeometry(.3,.34,H-.8,24),mt),c=new Q.Mesh(new Q.BoxGeometry(.9,.35,.9),mt),r=new Q.Mesh(new Q.TorusGeometry(.33,.04,8,24),gd);b.position.y=.175;s.position.y=H/2;c.position.y=H-.175;r.rotation.x=Math.PI/2;r.position.y=.4;g.add(b,s,c,r);g.position.set(x,0,z);sc.add(g)};
+[[0,0,24,24],[0,-36,28,28],[36,0,28,28],[-36,0,28,28]].forEach(([cx,cz,w,d])=>{[-1,1].forEach(a=>[-1,1].forEach(b=>col(cx+a*(w/2-1.3),cz+b*(d/2-1.3))));for(let x=-w/2+4;x<w/2;x+=6){const bm=new Q.Mesh(new Q.BoxGeometry(.35,.3,d),bmm);bm.position.set(cx+x,H-.16,cz);sc.add(bm)}});
+const rad=(c1,c2)=>{const k=document.createElement('canvas');k.width=k.height=128;const x=k.getContext('2d'),g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,c1);g.addColorStop(1,c2);x.fillStyle=g;x.fillRect(0,0,128,128);return new Q.CanvasTexture(k)};
+const glow=rad('rgba(255,244,214,.55)','rgba(255,244,214,0)'),shad=rad('rgba(0,0,0,.65)','rgba(0,0,0,0)'),LL=[0,L1,L2,L3];
+D.forEach(d=>{const c=HALL[d[0]].c,q=LL[d[0]][d[1]],x=c[0]+q[0],z=c[1]+q[1];const cone=new Q.Mesh(new Q.ConeGeometry(1.5,H,32,1,true),new Q.MeshBasicMaterial({color:'#fff1d0',transparent:true,opacity:.06,depthWrite:false,blending:Q.AdditiveBlending,side:2}));cone.position.set(x,H/2,z);sc.add(cone);
+ const pl=new Q.Mesh(new Q.CircleGeometry(1.9,32),new Q.MeshBasicMaterial({map:glow,transparent:true,depthWrite:false,blending:Q.AdditiveBlending}));pl.rotation.x=-Math.PI/2;pl.position.set(x,.03,z);sc.add(pl);
+ const bs=new Q.Mesh(new Q.CircleGeometry(1.5,32),new Q.MeshBasicMaterial({map:shad,transparent:true,depthWrite:false}));bs.rotation.x=-Math.PI/2;bs.position.set(x,.02,z);sc.add(bs)});
+const plant=(x,z)=>{const g=new Q.Group(),p=new Q.Mesh(new Q.CylinderGeometry(.35,.28,.6,20),new Q.MeshStandardMaterial({color:'#2b2b33',roughness:.4,metalness:.3}));p.position.y=.3;g.add(p);for(let i=0;i<9;i++){const l=new Q.Mesh(new Q.SphereGeometry(.28,12,10),new Q.MeshStandardMaterial({color:'hsl('+(105+Math.random()*30)+',55%,'+(22+Math.random()*12)+'%)',roughness:.6}));l.scale.set(.5,1.8,.2);const a=i/9*6.283;l.position.set(Math.cos(a)*.25,1.1,Math.sin(a)*.25);l.rotation.set(Math.sin(a)*.5,a,-Math.cos(a)*.5);g.add(l)}g.position.set(x,0,z);sc.add(g)};
+[[-9.3,-9.3],[9.3,-9.3],[-9.3,9.3],[9.3,9.3]].forEach(a=>plant(...a));
+const bn=(x,z)=>{const g=new Q.Group(),s=new Q.Mesh(new Q.BoxGeometry(2.4,.12,.7),new Q.MeshStandardMaterial({color:'#6b4a2c',roughness:.5}));s.position.y=.5;g.add(s);[-1,1].forEach(a=>{const f=new Q.Mesh(new Q.BoxGeometry(.08,.5,.6),bmm);f.position.set(a*1.05,.25,0);g.add(f)});g.position.set(x,0,z);sc.add(g)};bn(-5,8.8);bn(7,8.8);
+const N=420,dp=new Float32Array(N*3);for(let i=0;i<N;i++){dp[i*3]=(Math.random()-.5)*100;dp[i*3+1]=.5+Math.random()*4;dp[i*3+2]=-50+Math.random()*60}
+const dg=new Q.BufferGeometry();dg.setAttribute('position',new Q.BufferAttribute(dp,3));sc.add(new Q.Points(dg,new Q.PointsMaterial({color:'#fff6e0',size:.05,transparent:true,opacity:.55,depthWrite:false})));
+let ax=null,amb=null,lx=0,lz=0,ph=0,bob=0,ls=0;
+const ctx=()=>{if(ax)return;try{ax=new(window.AudioContext||window.webkitAudioContext)();const b=ax.createBuffer(1,ax.sampleRate*2,ax.sampleRate),d=b.getChannelData(0);let l=0;for(let i=0;i<d.length;i++){l=(l+.02*(Math.random()*2-1))/1.02;d[i]=l*3.5}const s=ax.createBufferSource();s.buffer=b;s.loop=true;const f=ax.createBiquadFilter();f.type='lowpass';f.frequency.value=380;amb=ax.createGain();amb.gain.value=.05;s.connect(f);f.connect(amb);amb.connect(ax.destination);s.start()}catch(e){}};
+addEventListener('pointerdown',ctx,{once:true});addEventListener('keydown',ctx,{once:true});
+const step=()=>{if(!ax||!sound)return;const b=ax.createBuffer(1,ax.sampleRate*.12,ax.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,4);const s=ax.createBufferSource();s.buffer=b;const f=ax.createBiquadFilter();f.type='lowpass';f.frequency.value=700;const g=ax.createGain();g.gain.value=.18;s.connect(f);f.connect(g);g.connect(ax.destination);s.start()};
+const _r=R.render.bind(R);R.render=(s,c)=>{const now=performance.now()/1000,sp=Math.hypot(c.position.x-lx,c.position.z-lz);lx=c.position.x;lz=c.position.z;if(sp>.004&&sp<1){ph+=sp*9;bob+=(Math.sin(ph)*.045-bob)*.5;if(Math.sin(ph)<-.97&&now-ls>.3){ls=now;step()}}else bob*=.85;if(amb)amb.gain.value=sound?.05:0;
+ const a=dg.attributes.position;for(let i=0;i<N;i++){a.array[i*3+1]+=Math.sin(now+i)*.0006;a.array[i*3]+=Math.cos(now*.5+i)*.0004}a.needsUpdate=true;const y=c.position.y;c.position.y=y+bob;_r(s,c);c.position.y=y};
+})();
+(()=>{const Q=THREE;
+const mk=f=>{const k=document.createElement('canvas');k.width=k.height=256;const x=k.getContext('2d');f(x);const t=new Q.CanvasTexture(k);t.wrapS=t.wrapT=Q.RepeatWrapping;t.anisotropy=8;return t};
+const wallB=mk(x=>{x.fillStyle='#0c1424';x.fillRect(0,0,256,256);for(let i=0;i<4;i++)for(let j=0;j<2;j++){const g=x.createLinearGradient(0,j*128,0,j*128+128);g.addColorStop(0,'#1a2840');g.addColorStop(1,'#0e1628');x.fillStyle=g;x.fillRect(i*64+3,j*128+3,58,122)}for(let i=0;i<500;i++){x.fillStyle='rgba(255,255,255,.04)';x.fillRect(Math.random()*256,Math.random()*256,2,2)}}),
+wallE=mk(x=>{x.fillStyle='#000';x.fillRect(0,0,256,256);x.fillStyle='#22d3ff';for(let i=0;i<4;i++){x.fillRect(i*64+30,6,4,116);x.globalAlpha=.4;x.fillRect(i*64,0,2,256);x.globalAlpha=1}x.fillRect(0,126,256,3);x.fillStyle='#ff4fd8';x.fillRect(0,250,256,4)}),
+floorB=mk(x=>{x.fillStyle='#090f1e';x.fillRect(0,0,256,256);for(let i=0;i<1500;i++){x.fillStyle='rgba(120,160,255,.05)';x.fillRect(Math.random()*256,Math.random()*256,2,2)}}),
+floorE=mk(x=>{x.fillStyle='#000';x.fillRect(0,0,256,256);x.fillStyle='#1fb6ff';x.fillRect(0,0,256,3);x.fillRect(0,0,3,256);x.fillStyle='#8a5cff';x.fillRect(120,120,16,16)});
+const sm=(len,w,h,B,E,ei,me,ro)=>{const b=B.clone(),e=E.clone();b.needsUpdate=e.needsUpdate=true;b.repeat.set(w,h);e.repeat.set(w,h);return new Q.MeshStandardMaterial({map:b,emissiveMap:e,emissive:'#ffffff',emissiveIntensity:ei,metalness:me,roughness:ro,envMapIntensity:1.5})};
+sc.children.slice().forEach(m=>{if(!m.isMesh)return;const g=m.geometry;if(g.type=='BoxGeometry'&&Math.abs(g.parameters.height-H)<.01){const len=Math.max(g.parameters.width,g.parameters.depth);m.material=sm(len,len/5,1,wallB,wallE,.9,.75,.3)}else if(g.type=='PlaneGeometry'&&Math.abs(m.rotation.x+Math.PI/2)<.01&&m.position.y==0){const p=g.parameters;m.material=sm(0,p.width/3,p.height/3,floorB,floorE,.75,.85,.12)}});
+sc.traverse(o=>{if(o.isMesh&&o.material.color){const h=o.material.color.getHexString();if(h=='e9e6df'){o.material.color.set('#141e2e');o.material.metalness=.85;o.material.roughness=.25;o.material.emissive.set('#06283c')}else if(h=='c9a24a'){o.material.color.set('#7ae7ff');o.material.emissive.set('#19c5ff');o.material.emissiveIntensity=1.4;o.material.metalness=.3}}});
+const gt=kind=>mk(x=>{x.fillStyle='#bdbdbd';x.fillRect(0,0,256,256);for(let i=0;i<7000;i++){const v=90+Math.random()*150|0;x.fillStyle='rgb('+v+','+v+','+v+')';x.fillRect(Math.random()*256,Math.random()*256,1+Math.random()*3,1+Math.random()*3)}
+ if(kind=='band'||kind=='meta'){for(let y=0;y<256;y+=6+Math.random()*10){x.fillStyle='rgba(0,0,0,'+(.08+Math.random()*.15)+')';x.fillRect(0,y,256,2+Math.random()*4)}}
+ if(kind=='speck'){for(let i=0;i<500;i++){x.fillStyle=Math.random()<.5?'#111':'#fff';x.fillRect(Math.random()*256,Math.random()*256,2+Math.random()*3,2+Math.random()*3)}}
+ if(kind=='meta'||kind=='crystal'){x.strokeStyle='rgba(255,255,255,.35)';for(let i=0;i<14;i++){x.lineWidth=.6+Math.random()*1.5;x.beginPath();x.moveTo(Math.random()*256,Math.random()*256);x.lineTo(Math.random()*256,Math.random()*256);x.stroke()}}});
+const K={prim:'band',folds:'band',faults:'band',uncon:'band',sed:'band',ign:'speck',meta:'meta',gold:'crystal',sys:'crystal',opt:'crystal',coh:'crystal',mohs:'crystal'};
+D.forEach((d,i)=>{const kind=K[d[4]];if(!kind||!EX[i])return;const tx=gt(kind);EX[i].sp.children[0].traverse(o=>{if(!o.isMesh||!o.material||!o.material.isMeshStandardMaterial)return;const m=o.material;m.map=tx;m.bumpMap=tx;m.bumpScale=3.5;m.color.offsetHSL(0,-.12,-.04);m.roughness=kind=='crystal'?.1:.8;if(d[4]=='gold'){m.color.set('#e0b030');m.metalness=1;m.roughness=.22}m.needsUpdate=true})});
+const gw=(c,r,m)=>new Q.MeshStandardMaterial({color:c,roughness:r==null?.5:r,metalness:m||0});
+const lab=GD.children[GD.children.length-1];GD.children.slice().forEach(c=>{if(c!==lab)GD.remove(c)});
+const skin=gw('#d9a47c',.6),coat=gw('#f2f4f7',.7),dark=gw('#1f2633',.6),shirt=gw('#2f7a6b',.7),hair=gw('#2a1a10',.8),eyeW=gw('#ffffff',.3);
+const add=(geo,mat,x,y,z,p)=>{const m=new Q.Mesh(geo,mat);m.position.set(x,y,z);(p||GD).add(m);return m};
+[-.1,.1].forEach(x=>{add(new Q.CylinderGeometry(.075,.065,.85,16),dark,x,.5,0);add(new Q.BoxGeometry(.13,.07,.26),gw('#14161c',.4),x,.04,.04)});
+const torso=add(new Q.CylinderGeometry(.22,.19,.72,24),coat,0,1.27,0);torso.scale.z=.62;
+add(new Q.BoxGeometry(.13,.6,.02),shirt,0,1.3,.125);add(new Q.BoxGeometry(.07,.09,.01),gw('#c8d0da',.4),.12,1.4,.13);add(new Q.CylinderGeometry(.055,.06,.1,12),skin,0,1.66,0);
+const head=new Q.Group();head.position.set(0,1.78,0);GD.add(head);
+const hd=add(new Q.SphereGeometry(.125,32,24),skin,0,0,0,head);hd.scale.set(.9,1.12,1);
+const hr=add(new Q.SphereGeometry(.13,32,16,0,6.283,0,1.5),hair,0,.015,-.01,head);hr.scale.set(.95,1.12,1.05);hr.rotation.x=-.25;
+const eyes=[];[-1,1].forEach(s=>{eyes.push(add(new Q.SphereGeometry(.02,12,10),eyeW,s*.046,.02,.108,head));add(new Q.SphereGeometry(.0105,12,10),gw('#2a1a10',.2),s*.046,.02,.124,head);add(new Q.BoxGeometry(.05,.009,.01),hair,s*.046,.058,.115,head);add(new Q.SphereGeometry(.022,10,8),skin,s*.115,0,0,head);add(new Q.TorusGeometry(.027,.003,8,20),gw('#222',.3,.8),s*.046,.02,.127,head)});
+add(new Q.BoxGeometry(.03,.003,.003),gw('#222',.3,.8),0,.025,.128,head);add(new Q.SphereGeometry(.018,10,8),gw('#cf9468',.6),0,-.015,.125,head);
+const mo=add(new Q.BoxGeometry(.05,.008,.008),gw('#8e4a44',.5),0,-.06,.118,head);
+const arm=s=>{const g=new Q.Group();g.position.set(s*.27,1.52,0);GD.add(g);add(new Q.CylinderGeometry(.055,.048,.6,14),coat,0,-.3,0,g);add(new Q.SphereGeometry(.05,12,10),skin,0,-.63,0,g);return g};
+const aL=arm(-1),aR=arm(1);aL.rotation.z=-.08;aR.rotation.z=.08;
+const _r2=R.render;R.render=(s,c)=>{const t=performance.now()/1000,sp=window.speechSynthesis&&speechSynthesis.speaking&&sound;torso.scale.y=1+.012*Math.sin(t*2);head.rotation.z=.03*Math.sin(t*.8);head.rotation.y=.05*Math.sin(t*.6);mo.scale.y=sp?1+Math.abs(Math.sin(t*13))*4:1;aR.rotation.z+=((sp?2.2+.25*Math.sin(t*6):.08)-aR.rotation.z)*.12;const b=(t%4)<.12?.1:1;eyes.forEach(e=>e.scale.y=b);return _r2(s,c)};
+})();
+
+}catch(err){console.error('visual enhancement failed',err)}
+</script>
+</body>
+</html>
